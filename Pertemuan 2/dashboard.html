@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — UNSCollab</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand:   #1A56DB;
+      --brand-l: #3B82F6;
+      --bg:      #F8FAFC;
+      --surface: #FFFFFF;
+      --surface2:#F1F5F9;
+      --border:  #E2E8F0;
+      --text:    #0F172A;
+      --muted:   #64748B;
+      --success: #16A34A;
+      --warn:    #D97706;
+      --danger:  #DC2626;
+      --purple:  #6366F1;
+      --radius:  12px;
+      --radius-sm: 8px;
+      --shadow:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── LAYOUT ───────────────────────────────── */
+    .wrapper { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ──────────────────────────────── */
+    .sidebar {
+      width: 248px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      z-index: 200;
+      transition: transform .25s ease;
+    }
+
+    .sidebar-brand {
+      padding: 20px 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: var(--brand);
+      border-radius: 9px;
+      display: grid; place-items: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .brand-name {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -.3px;
+      color: var(--text);
+    }
+    .brand-name span { color: var(--brand); }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 14px 18px 5px;
+    }
+    .nav-link-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 12px;
+      margin: 2px 8px;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .15s;
+      position: relative;
+    }
+    .nav-link-item i { font-size: 15px; flex-shrink: 0; }
+    .nav-link-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-link-item.active { background: #EEF3FF; color: var(--brand); font-weight: 600; }
+    .nav-link-item.active::before {
+      content: '';
+      position: absolute;
+      left: -8px; top: 25%; bottom: 25%;
+      width: 3px; background: var(--brand);
+      border-radius: 0 3px 3px 0;
+    }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 20px;
+    }
+    .pill-blue  { background:#DBEAFE; color:#1D4ED8; }
+    .pill-red   { background:#FEE2E2; color:#B91C1C; }
+    .pill-green { background:#DCFCE7; color:#15803D; }
+    .pill-yellow{ background:#FEF9C3; color:#A16207; }
+    .pill-purple{ background:#EDE9FE; color:#6D28D9; }
+    .pill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 12px 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── TOPBAR ───────────────────────────────── */
+    .main-content { margin-left: 248px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    #topbar {
+      height: 60px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky; top: 0; z-index: 100;
+      gap: 12px;
+    }
+    .topbar-search {
+      flex: 1;
+      max-width: 320px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 7px 12px;
+      color: var(--muted);
+    }
+    .topbar-search input {
+      border: none; background: transparent;
+      color: var(--text); font-size: 13px;
+      font-family: inherit; outline: none; width: 100%;
+    }
+    .topbar-search input::placeholder { color: var(--muted); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; position: relative; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      color: var(--muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all .15s;
+      position: relative;
+    }
+    .icon-btn:hover { color: var(--text); border-color: var(--brand); }
+    .notif-dot {
+      position: absolute;
+      top: 7px; right: 7px;
+      width: 7px; height: 7px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 1.5px solid var(--surface);
+    }
+    .avatar-btn {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      display: grid; place-items: center;
+      cursor: pointer;
+    }
+    /* notif dropdown */
+    .notif-dd {
+      display: none;
+      position: absolute;
+      top: 48px; right: 40px;
+      width: 300px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      z-index: 300;
+    }
+    .notif-dd.open { display: block; }
+    .notif-header { padding: 12px 16px; font-weight: 700; font-size: 13px; border-bottom: 1px solid var(--border); }
+    .notif-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-ico { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .notif-text { font-size: 12.5px; color: var(--text); }
+    .notif-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── PAGES ────────────────────────────────── */
+    #content { padding: 24px; flex: 1; }
+    .page { display: none; }
+    .page.active { display: block; animation: fadeUp .25s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .pg-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      margin-bottom: 22px;
+    }
+    .pg-header h4 { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+    .pg-header p  { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+    /* ── CARDS ────────────────────────────────── */
+    .ui-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .card-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .card-head h6 { font-size: 13px; font-weight: 700; margin: 0; }
+
+    /* ── STAT CARDS ───────────────────────────── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .stat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 18px;
+      margin-bottom: 10px;
+    }
+    .stat-val { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+    .stat-label { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+    .stat-trend { font-size: 11px; font-weight: 600; }
+
+    /* ── BAR CHART ────────────────────────────── */
+    .bar-group {
+      display: flex; align-items: flex-end; gap: 10px;
+      height: 130px; padding: 0 4px;
+    }
+    .bar-item { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 4px; }
+    .bar-fill { width: 100%; border-radius: 5px 5px 0 0; transition: height .7s cubic-bezier(.34,1.56,.64,1); min-width: 20px; }
+    .bar-lbl { font-size: 10px; color: var(--muted); text-align: center; white-space: nowrap; }
+
+    /* ── PROGRESS ─────────────────────────────── */
+    .prog-row { margin-bottom: 12px; }
+    .prog-top { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .prog-bar { height: 6px; background: var(--surface2); border-radius: 10px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 10px; transition: width .7s ease; }
+
+    /* ── TIMELINE ─────────────────────────────── */
+    .tl-item { display: flex; gap: 12px; padding-bottom: 14px; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+    .tl-line { flex: 1; width: 1px; background: var(--border); margin-top: 3px; }
+    .tl-title { font-size: 13px; color: var(--text); }
+    .tl-time  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── LOWONGAN CARDS ───────────────────────── */
+    .lw-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all .15s;
+      height: 100%;
+    }
+    .lw-card:hover { border-color: var(--brand-l); box-shadow: 0 0 0 3px rgba(26,86,219,.06); transform: translateY(-2px); }
+    .lw-card.pending-card { opacity: .85; cursor: default; }
+    .lw-card.pending-card:hover { transform: none; border-color: var(--border); box-shadow: none; }
+    .lw-icon { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; font-size: 16px; flex-shrink: 0; }
+    .float-label { display: inline-block; font-size: 11px; font-weight: 500; background: var(--surface2); color: var(--muted); border-radius: 6px; padding: 2px 8px; margin: 0 3px 4px 0; }
+    .lw-footer { display: flex; align-items: center; justify-content: space-between; }
+
+    /* status filter tabs */
+    .nav-pill-tab {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      text-decoration: none;
+    }
+    .nav-pill-tab:hover { background: var(--surface2); color: var(--text); }
+    .nav-pill-tab.active { background: var(--brand); color: #fff; }
+
+    /* pending banner */
+    .pending-banner {
+      background: #FFFBEB;
+      border: 1px solid #FDE68A;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 12px;
+      color: #92400E;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    /* ── TABLE ────────────────────────────────── */
+    .ui-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .ui-table th {
+      font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase;
+      color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--border);
+      background: var(--surface2); white-space: nowrap;
+    }
+    .ui-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+    .ui-table th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+    .ui-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .ui-table tbody tr { cursor: pointer; transition: background .12s; }
+    .ui-table tbody tr:hover td { background: #F8FAFF; }
+    .ui-table tbody tr:last-child td { border-bottom: none; }
+    .mini-avatar {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+
+    /* ── DETAIL PAGE ──────────────────────────── */
+    .profile-hero {
+      background: linear-gradient(135deg, var(--brand) 0%, #6366F1 100%);
+      border-radius: var(--radius);
+      padding: 24px;
+      color: #fff;
+    }
+    .big-avatar {
+      width: 60px; height: 60px; border-radius: 14px;
+      background: rgba(255,255,255,.25);
+      display: grid; place-items: center;
+      font-size: 20px; font-weight: 800; flex-shrink: 0;
+    }
+
+    /* flow steps */
+    .flow-step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .flow-step:not(:last-child)::after {
+      content: ''; position: absolute; top: 13px; left: 50%; width: 100%; height: 2px;
+      background: var(--border); z-index: 0;
+    }
+    .flow-dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 11px; font-weight: 700;
+      border: 2px solid var(--border);
+      background: var(--surface); color: var(--muted);
+      position: relative; z-index: 1;
+    }
+    .flow-dot.done { background: var(--success); border-color: var(--success); color: #fff; }
+    .flow-dot.current { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .flow-label { font-size: 10px; color: var(--muted); margin-top: 5px; text-align: center; }
+
+    .info-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
+    .info-key { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 3px; }
+    .info-val { font-size: 13px; font-weight: 600; }
+    .skill-tag { display: inline-block; padding: 4px 10px; background: #EEF3FF; color: var(--brand); border-radius: 20px; font-size: 11px; font-weight: 600; margin: 3px 3px 3px 0; }
+    .doc-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+
+    /* ── FORM / TAMBAH ────────────────────────── */
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
+      display: grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--muted);
+    }
+    .step-num.active-step { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .step-num.done-step { background: var(--success); border-color: var(--success); color: #fff; }
+
+    /* ── PROFIL ───────────────────────────────── */
+    /* (reuses ui-card) */
+
+    /* ── PENGATURAN ───────────────────────────── */
+    .toggle-switch {
+      width: 38px; height: 20px; border-radius: 20px;
+      background: var(--border); cursor: pointer; position: relative;
+      transition: background .2s; flex-shrink: 0;
+    }
+    .toggle-switch::after {
+      content: ''; position: absolute;
+      width: 14px; height: 14px; background: #fff;
+      border-radius: 50%; top: 3px; left: 3px;
+      transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .toggle-switch.active { background: var(--brand); }
+    .toggle-switch.active::after { transform: translateX(18px); }
+
+    /* ── BUTTONS ──────────────────────────────── */
+    .btn-brand {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--brand); color: #fff;
+      border: none; border-radius: 9px;
+      padding: 8px 16px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn-brand:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-brand.w-100 { width: 100%; justify-content: center; }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border); border-radius: 9px;
+      padding: 8px 14px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: all .15s;
+    }
+    .btn-outline:hover { border-color: var(--brand); color: var(--brand); }
+    .btn-outline.w-100 { width: 100%; justify-content: center; }
+    .btn-sm { padding: 5px 10px !important; font-size: 12px !important; }
+    .btn-success-soft {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #DCFCE7; color: var(--success); border: 1px solid #BBF7D0;
+      border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-danger-soft {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #FEE2E2; color: var(--danger); border: 1px solid #FECACA;
+      border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-danger-soft.w-100 { width: 100%; justify-content: center; }
+
+    /* ── TOAST ────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: #1E293B; color: #fff;
+      padding: 12px 20px; border-radius: 10px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.2);
+      transition: transform .3s ease;
+      z-index: 9999; white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── MOBILE ───────────────────────────────── */
+    #mob-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.4); z-index: 190;
+    }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      #mob-overlay.show { display: block; }
+      .topbar-search { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar" class="sidebar">
+  <div class="sidebar-brand">
+    <img src="assets/logo_unscollab2.png" alt="UNSCollab Logo" style="width: 180px;">
+  </div>
+
+  <div class="nav-label">Menu Utama</div>
+  <a class="nav-link-item active" onclick="showPage('dashboard', this)">
+    <i class="bi bi-grid-1x2"></i> Dashboard
+  </a>
+  <a class="nav-link-item" onclick="showPage('lowongan', this)">
+    <i class="bi bi-briefcase"></i> Kelola Lowongan
+    <span class="nav-badge pill-blue">8</span>
+  </a>
+  <a class="nav-link-item" onclick="showPage('pelamar', this)">
+    <i class="bi bi-people"></i> Kelola Pelamar
+    <span class="nav-badge pill-red">47</span>
+  </a>
+  <a class="nav-link-item" onclick="showPage('tambah', this)">
+    <i class="bi bi-plus-circle"></i> Buat Lowongan
+  </a>
+
+  <div class="nav-label" style="margin-top:8px">Pengaturan</div>
+  <a class="nav-link-item" onclick="showPage('profil', this)">
+    <i class="bi bi-person-circle"></i> Profil Perusahaan
+  </a>
+  <a class="nav-link-item" onclick="showPage('pengaturan', this)">
+    <i class="bi bi-gear"></i> Pengaturan Akun
+  </a>
+
+  <div class="sidebar-bottom">
+    <a class="nav-link-item" style="color:var(--danger)" onclick="doLogout()">
+      <i class="bi bi-box-arrow-right"></i> Keluar
+    </a>
+  </div>
+</nav>
+
+<div id="mob-overlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<div class="main-content">
+  <!-- TOPBAR -->
+  <header id="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="icon-btn" id="menu-toggle" onclick="toggleSidebar()" style="display:none">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+    <div class="topbar-search">
+      <i class="bi bi-search" style="font-size:14px"></i>
+      <input type="text" placeholder="Cari lowongan, pelamar...">
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" onclick="toggleNotif()" id="notif-trigger">
+        <i class="bi bi-bell"></i>
+        <span class="notif-dot" id="ndot"></span>
+      </div>
+      <div class="notif-dd" id="notif-dd">
+        <div class="notif-header">Notifikasi</div>
+        <div class="notif-item">
+          <div class="notif-ico" style="background:#1A56DB"></div>
+          <div class="notif-content">
+            <div class="notif-text">2 pelamar baru untuk Backend Developer</div>
+            <div class="notif-time">2 jam yang lalu</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-ico" style="background:#16A34A"></div>
+          <div class="notif-content">
+            <div class="notif-text">Lowongan UI Designer disetujui Admin</div>
+            <div class="notif-time">5 jam yang lalu</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-ico" style="background:#DC2626"></div>
+          <div class="notif-content">
+            <div class="notif-text">Lowongan Data Analyst ditolak Admin</div>
+            <div class="notif-time">1 hari yang lalu</div>
+          </div>
+        </div>
+      </div>
+      <div class="icon-btn"><i class="bi bi-envelope"></i></div>
+      <div class="avatar-btn" id="topbarAvatar">AC</div>
+    </div>
+  </header>
+
+  <main id="content">
+
+    <!-- ═══════════════ DASHBOARD ═══════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="pg-header">
+        <div>
+          <h4>Dashboard</h4>
+          <p>Selamat datang kembali, <strong id="greetName">AirCrops</strong> 👋</p>
+        </div>
+        <button class="btn-brand" onclick="showPage('tambah', null)">
+          <i class="bi bi-plus-lg"></i> Buat Lowongan
+        </button>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#DBEAFE"><i class="bi bi-briefcase-fill" style="color:#1D4ED8"></i></div>
+            <div class="stat-val" style="color:#1D4ED8" id="sv1">0</div>
+            <div class="stat-label">Lowongan Aktif</div>
+            <div class="stat-trend" style="color:var(--success)"><i class="bi bi-arrow-up-short"></i> 2 bulan ini</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FEF3C7"><i class="bi bi-people-fill" style="color:#D97706"></i></div>
+            <div class="stat-val" id="sv2">0</div>
+            <div class="stat-label">Total Pelamar</div>
+            <div class="stat-trend" style="color:var(--success)"><i class="bi bi-arrow-up-short"></i> 12 minggu ini</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FEE2E2"><i class="bi bi-clock-fill" style="color:#A16207"></i></div>
+            <div class="stat-val" style="color:#A16207" id="sv3">0</div>
+            <div class="stat-label">Menunggu Verifikasi</div>
+            <div class="stat-trend" style="color:var(--danger)"><i class="bi bi-exclamation-circle"></i> Perlu tindakan</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#F0FDF4"><i class="bi bi-check-circle-fill" style="color:#16A34A"></i></div>
+            <div class="stat-val" style="color:#16A34A" id="sv4">0</div>
+            <div class="stat-label">Pelamar Diterima</div>
+            <div class="stat-trend" style="color:var(--muted)">Bulan ini</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="ui-card h-100">
+            <div class="card-head">
+              <h6><i class="bi bi-bar-chart-fill me-2" style="color:var(--brand)"></i>Pelamar per Posisi</h6>
+              <span style="font-size:11px;color:var(--muted)">7 hari terakhir</span>
+            </div>
+            <div class="bar-group">
+              <div class="bar-item"><div class="bar-fill" id="b1" style="height:0;background:var(--brand)"></div><div class="bar-lbl">Frontend</div></div>
+              <div class="bar-item"><div class="bar-fill" id="b2" style="height:0;background:#6366F1"></div><div class="bar-lbl">Backend</div></div>
+              <div class="bar-item"><div class="bar-fill" id="b3" style="height:0;background:#8B5CF6"></div><div class="bar-lbl">UI/UX</div></div>
+              <div class="bar-item"><div class="bar-fill" id="b4" style="height:0;background:#F59E0B"></div><div class="bar-lbl">Data Analyst</div></div>
+              <div class="bar-item"><div class="bar-fill" id="b5" style="height:0;background:#10B981"></div><div class="bar-lbl">Sekretaris</div></div>
+              <div class="bar-item"><div class="bar-fill" id="b6" style="height:0;background:#EF4444"></div><div class="bar-lbl">HRD</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="ui-card h-100">
+            <div class="card-head">
+              <h6><i class="bi bi-pie-chart-fill me-2" style="color:#6366F1"></i>Status Pelamar</h6>
+            </div>
+            <div class="prog-row">
+              <div class="prog-top"><span style="font-size:12px">Menunggu Review</span><span style="font-size:12px;color:var(--muted)">12 / 47</span></div>
+              <div class="prog-bar"><div class="prog-fill" id="p1" style="width:0%;background:#EAB308"></div></div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-top"><span style="font-size:12px">Sedang Diproses</span><span style="font-size:12px;color:var(--muted)">18 / 47</span></div>
+              <div class="prog-bar"><div class="prog-fill" id="p2" style="width:0%;background:var(--brand)"></div></div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-top"><span style="font-size:12px">Diterima</span><span style="font-size:12px;color:var(--muted)">6 / 47</span></div>
+              <div class="prog-bar"><div class="prog-fill" id="p3" style="width:0%;background:#16A34A"></div></div>
+            </div>
+            <div class="prog-row">
+              <div class="prog-top"><span style="font-size:12px">Ditolak</span><span style="font-size:12px;color:var(--muted)">11 / 47</span></div>
+              <div class="prog-bar"><div class="prog-fill" id="p4" style="width:0%;background:#EF4444"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-7">
+          <div class="ui-card">
+            <div class="card-head">
+              <h6><i class="bi bi-activity me-2" style="color:#6366F1"></i>Aktivitas Terbaru</h6>
+              <a style="font-size:12px;color:var(--brand);cursor:pointer" onclick="showPage('pelamar',null)">Lihat semua</a>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot" style="background:var(--brand)"></div><div class="tl-line"></div></div>
+              <div class="tl-body"><div class="tl-title">Andi Saputra melamar <strong>Frontend Developer</strong></div><div class="tl-time">10 menit lalu</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot" style="background:#16A34A"></div><div class="tl-line"></div></div>
+              <div class="tl-body"><div class="tl-title">Lowongan <strong>UI Designer</strong> disetujui admin</div><div class="tl-time">1 jam lalu</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot" style="background:#D97706"></div><div class="tl-line"></div></div>
+              <div class="tl-body"><div class="tl-title">Rizky Wibowo melamar <strong>Sekretaris</strong></div><div class="tl-time">2 jam lalu</div></div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-left"><div class="tl-dot" style="background:#6366F1"></div></div>
+              <div class="tl-body"><div class="tl-title">Sinta Dewi <strong>diterima</strong> sebagai Backend Dev</div><div class="tl-time">Kemarin, 14:30</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="ui-card">
+            <div class="card-head"><h6><i class="bi bi-lightning-fill me-2" style="color:#EAB308"></i>Aksi Cepat</h6></div>
+            <div class="d-flex flex-column gap-2">
+              <button class="btn-brand w-100" onclick="showPage('tambah',null)"><i class="bi bi-plus-circle"></i> Buat Lowongan Baru</button>
+              <button class="btn-outline w-100" onclick="showPage('pelamar',null)"><i class="bi bi-people"></i> Lihat Semua Pelamar</button>
+              <button class="btn-outline w-100" onclick="showPage('lowongan',null)"><i class="bi bi-briefcase"></i> Kelola Lowongan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ LOWONGAN ═══════════════ -->
+    <div class="page" id="page-lowongan">
+      <div class="pg-header">
+        <div>
+          <h4>Kelola Lowongan</h4>
+          <p>Semua lowongan yang kamu buat</p>
+        </div>
+        <button class="btn-brand" onclick="showPage('tambah',null)"><i class="bi bi-plus-lg"></i> Buat Lowongan</button>
+      </div>
+
+      <!-- pending info banner -->
+      <div class="pending-banner">
+        <i class="bi bi-info-circle-fill" style="color:#D97706;font-size:15px;flex-shrink:0"></i>
+        <span><strong>2 lowongan sedang menunggu verifikasi admin.</strong> Lowongan baru hanya bisa dilihat mahasiswa setelah disetujui. Kamu akan mendapat notifikasi setelah diproses.</span>
+      </div>
+
+      <ul class="nav nav-pills mb-3" style="gap:6px" id="lw-filter-tabs">
+        <li class="nav-item"><a class="nav-pill-tab active" onclick="filterLw('all',this)" data-filter="all">Semua (8)</a></li>
+        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('aktif',this)" data-filter="aktif">Aktif (5)</a></li>
+        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('pending',this)" data-filter="pending">Pending (2)</a></li>
+        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('ditutup',this)" data-filter="ditutup">Ditutup (1)</a></li>
+      </ul>
+
+      <div class="row g-3" id="lw-grid">
+        <!-- aktif -->
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="aktif">
+          <div class="lw-card" onclick="showPage('pelamar',null)">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#DBEAFE"><i class="bi bi-code-slash" style="color:#1D4ED8"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Frontend Developer</div><div style="font-size:11px;color:var(--muted)">Dibuat 3 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Jakarta</span><span class="float-label">Full-time</span><span class="float-label">8–12 jt</span></div>
+            <div class="clearfix mb-3"><span class="pill pill-green"><i class="bi bi-circle-fill" style="font-size:7px"></i> Aktif</span></div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 14 pelamar</span><button class="btn-outline btn-sm" onclick="event.stopPropagation();showPage('pelamar',null)">Lihat <i class="bi bi-arrow-right"></i></button></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="aktif">
+          <div class="lw-card" onclick="showPage('pelamar',null)">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#EDE9FE"><i class="bi bi-palette" style="color:#6D28D9"></i></div>
+              <div><div style="font-size:13px;font-weight:600">UI/UX Designer</div><div style="font-size:11px;color:var(--muted)">Dibuat 5 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Remote</span><span class="float-label">Full-time</span><span class="float-label">7–10 jt</span></div>
+            <div class="clearfix mb-3"><span class="pill pill-green"><i class="bi bi-circle-fill" style="font-size:7px"></i> Aktif</span></div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 9 pelamar</span><button class="btn-outline btn-sm" onclick="event.stopPropagation();showPage('pelamar',null)">Lihat <i class="bi bi-arrow-right"></i></button></div>
+          </div>
+        </div>
+        <!-- pending -->
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="pending">
+          <div class="lw-card pending-card">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#FEF9C3"><i class="bi bi-graph-up" style="color:#A16207"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Data Analyst</div><div style="font-size:11px;color:var(--muted)">Dibuat 2 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Bandung</span><span class="float-label">Part-time</span><span class="float-label">5–8 jt</span></div>
+            <div class="clearfix mb-2"><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu Persetujuan Admin</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px"><i class="bi bi-info-circle"></i> Belum bisa dilihat mahasiswa</div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 0 pelamar</span><button class="btn-outline btn-sm" disabled style="opacity:.4;cursor:not-allowed">Menunggu...</button></div>
+          </div>
+        </div>
+        <!-- ditutup -->
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="ditutup">
+          <div class="lw-card" style="opacity:.75">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#FEE2E2"><i class="bi bi-person-badge" style="color:#B91C1C"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Sekretaris</div><div style="font-size:11px;color:var(--muted)">Dibuat 10 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Surabaya</span><span class="float-label">Full-time</span><span class="float-label">6–9 jt</span></div>
+            <div class="clearfix mb-3"><span class="pill pill-red"><i class="bi bi-x-circle-fill" style="font-size:9px"></i> Ditutup</span></div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 24 pelamar</span><button class="btn-outline btn-sm" onclick="event.stopPropagation();showPage('pelamar',null)">Lihat <i class="bi bi-arrow-right"></i></button></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="aktif">
+          <div class="lw-card" onclick="showPage('pelamar',null)">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#FFF0F0"><i class="bi bi-server" style="color:#B91C1C"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Backend Developer</div><div style="font-size:11px;color:var(--muted)">Dibuat 7 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Surabaya</span><span class="float-label">Full-time</span><span class="float-label">10–15 jt</span></div>
+            <div class="clearfix mb-3"><span class="pill pill-green"><i class="bi bi-circle-fill" style="font-size:7px"></i> Aktif</span></div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 8 pelamar</span><button class="btn-outline btn-sm">Lihat <i class="bi bi-arrow-right"></i></button></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="aktif">
+          <div class="lw-card" onclick="showPage('pelamar',null)">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#FEF3C7"><i class="bi bi-people" style="color:#D97706"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Staff Human Resources</div><div style="font-size:11px;color:var(--muted)">Dibuat 4 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Jakarta</span><span class="float-label">Full-time</span><span class="float-label">7–11 jt</span></div>
+            <div class="clearfix mb-3"><span class="pill pill-green"><i class="bi bi-circle-fill" style="font-size:7px"></i> Aktif</span></div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 11 pelamar</span><button class="btn-outline btn-sm">Lihat <i class="bi bi-arrow-right"></i></button></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="aktif">
+          <div class="lw-card" onclick="showPage('pelamar',null)">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#ECFDF5"><i class="bi bi-cash-coin" style="color:#059669"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Staff Keuangan</div><div style="font-size:11px;color:var(--muted)">Dibuat 6 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Bandung</span><span class="float-label">Full-time</span><span class="float-label">8–12 jt</span></div>
+            <div class="clearfix mb-3"><span class="pill pill-green"><i class="bi bi-circle-fill" style="font-size:7px"></i> Aktif</span></div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 7 pelamar</span><button class="btn-outline btn-sm">Lihat <i class="bi bi-arrow-right"></i></button></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-xl-4 lw-col" data-status="pending">
+          <div class="lw-card pending-card">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="lw-icon" style="background:#F3F4F6"><i class="bi bi-megaphone" style="color:#6B7280"></i></div>
+              <div><div style="font-size:13px;font-weight:600">Marketing Officer</div><div style="font-size:11px;color:var(--muted)">Dibuat 1 hari lalu</div></div>
+            </div>
+            <div class="mb-2"><span class="float-label">Jakarta</span><span class="float-label">Part-time</span><span class="float-label">5–8 jt</span></div>
+            <div class="clearfix mb-2"><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu Persetujuan Admin</span></div>
+            <div style="font-size:11px;color:var(--muted);margin-bottom:10px"><i class="bi bi-info-circle"></i> Belum bisa dilihat mahasiswa</div>
+            <div class="lw-footer"><span style="font-size:12px;color:var(--muted)"><i class="bi bi-people"></i> 0 pelamar</span><button class="btn-outline btn-sm" disabled style="opacity:.4;cursor:not-allowed">Menunggu...</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PELAMAR ═══════════════ -->
+    <div class="page" id="page-pelamar">
+      <div class="pg-header">
+        <div>
+          <h4>Kelola Pelamar</h4>
+          <p>Semua posisi — <strong>47 pelamar</strong></p>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+          <select class="form-select" style="width:auto;font-size:13px">
+            <option>Semua Posisi</option>
+            <option>Frontend Developer</option>
+            <option>Backend Developer</option>
+            <option>UI/UX Designer</option>
+            <option>Data Analyst</option>
+            <option>Sekretaris</option>
+            <option>Staff HRD</option>
+            <option>Staff Keuangan</option>
+            <option>Marketing Officer</option>
+          </select>
+          <select class="form-select" style="width:auto;font-size:13px">
+            <option>Semua Status</option>
+            <option>Menunggu</option>
+            <option>Sedang Diproses</option>
+            <option>Diterima</option>
+            <option>Ditolak</option>
+          </select>
+          <input type="text" class="form-control" placeholder="Cari nama..." style="width:160px;font-size:13px">
+        </div>
+      </div>
+      <div class="ui-card p-0 overflow-hidden">
+        <div class="table-responsive">
+          <table class="ui-table">
+            <thead>
+              <tr>
+                <th>Nama Pelamar</th>
+                <th>Posisi Dilamar</th>
+                <th>Jurusan — UNS</th>
+                <th>IPK</th>
+                <th>Tanggal Lamar</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="goDetail('Andi Saputra','Frontend Developer','AS','#DBEAFE','#1D4ED8','Menunggu','pill-yellow')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#DBEAFE;color:#1D4ED8">AS</div><span style="font-weight:500">Andi Saputra</span></div></td>
+                <td><span class="pill pill-blue" style="font-size:11px">Frontend Dev</span></td>
+                <td>Informatika</td>
+                <td><code style="font-family:'DM Mono',monospace">3.87</code></td>
+                <td>10 Apr 2025</td>
+                <td><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Andi Saputra','Frontend Developer','AS','#DBEAFE','#1D4ED8','Menunggu','pill-yellow')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+              <tr onclick="goDetail('Sinta Dewi','Backend Developer','SD','#EDE9FE','#6D28D9','Diterima','pill-green')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#EDE9FE;color:#6D28D9">SD</div><span style="font-weight:500">Sinta Dewi</span></div></td>
+                <td><span class="pill pill-purple" style="font-size:11px">Backend Dev</span></td>
+                <td>Informatika</td>
+                <td><code style="font-family:'DM Mono',monospace">3.75</code></td>
+                <td>12 Apr 2025</td>
+                <td><span class="pill pill-green"><i class="bi bi-check-circle" style="font-size:9px"></i> Diterima</span></td>
+                <td><button class="btn-outline btn-sm" onclick="event.stopPropagation();goDetail('Sinta Dewi','Backend Developer','SD','#EDE9FE','#6D28D9','Diterima','pill-green')"><i class="bi bi-eye"></i> Detail</button></td>
+              </tr>
+              <tr onclick="goDetail('Rizky Wibowo','Sekretaris','RW','#FEF9C3','#A16207','Menunggu','pill-yellow')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#FEF9C3;color:#A16207">RW</div><span style="font-weight:500">Rizky Wibowo</span></div></td>
+                <td><span class="pill pill-yellow" style="font-size:11px">Sekretaris</span></td>
+                <td>Administrasi Bisnis</td>
+                <td><code style="font-family:'DM Mono',monospace">3.65</code></td>
+                <td>13 Apr 2025</td>
+                <td><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Rizky Wibowo','Sekretaris','RW','#FEF9C3','#A16207','Menunggu','pill-yellow')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+              <tr onclick="goDetail('Sukma Adiningrat','Staff Keuangan','SA','#FEE2E2','#B91C1C','Ditolak','pill-red')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#FEE2E2;color:#B91C1C">SA</div><span style="font-weight:500">Sukma Adiningrat</span></div></td>
+                <td><span class="pill pill-red" style="font-size:11px">Staff Keuangan</span></td>
+                <td>Akuntansi</td>
+                <td><code style="font-family:'DM Mono',monospace">3.80</code></td>
+                <td>14 Apr 2025</td>
+                <td><span class="pill pill-red"><i class="bi bi-x-circle" style="font-size:9px"></i> Ditolak</span></td>
+                <td><button class="btn-outline btn-sm" onclick="event.stopPropagation();goDetail('Sukma Adiningrat','Staff Keuangan','SA','#FEE2E2','#B91C1C','Ditolak','pill-red')"><i class="bi bi-eye"></i> Detail</button></td>
+              </tr>
+              <tr onclick="goDetail('Dewi Nuraini','Staff HRD','DN','#DCFCE7','#15803D','Diproses','pill-purple')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#DCFCE7;color:#15803D">DN</div><span style="font-weight:500">Dewi Nuraini</span></div></td>
+                <td><span class="pill pill-green" style="font-size:11px">Staff HRD</span></td>
+                <td>Psikologi</td>
+                <td><code style="font-family:'DM Mono',monospace">3.72</code></td>
+                <td>14 Apr 2025</td>
+                <td><span class="pill pill-purple"><i class="bi bi-arrow-repeat" style="font-size:9px"></i> Diproses</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Dewi Nuraini','Staff HRD','DN','#DCFCE7','#15803D','Diproses','pill-purple')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+              <tr onclick="goDetail('Bagas Pratama','Data Analyst','BP','#F3F4F6','#374151','Menunggu','pill-yellow')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#F3F4F6;color:#374151">BP</div><span style="font-weight:500">Bagas Pratama</span></div></td>
+                <td><span class="pill pill-blue" style="font-size:11px">Data Analyst</span></td>
+                <td>Statistika</td>
+                <td><code style="font-family:'DM Mono',monospace">3.90</code></td>
+                <td>15 Apr 2025</td>
+                <td><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Bagas Pratama','Data Analyst','BP','#F3F4F6','#374151','Menunggu','pill-yellow')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+              <tr onclick="goDetail('Laila Hasanah','Marketing Officer','LH','#FEF3C7','#D97706','Menunggu','pill-yellow')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#FEF3C7;color:#D97706">LH</div><span style="font-weight:500">Laila Hasanah</span></div></td>
+                <td><span class="pill pill-yellow" style="font-size:11px">Marketing Officer</span></td>
+                <td>Manajemen</td>
+                <td><code style="font-family:'DM Mono',monospace">3.55</code></td>
+                <td>15 Apr 2025</td>
+                <td><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Laila Hasanah','Marketing Officer','LH','#FEF3C7','#D97706','Menunggu','pill-yellow')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+              <tr onclick="goDetail('Muhammad Rasyid','UI/UX Designer','MR','#DBEAFE','#1D4ED8','Diproses','pill-purple')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#DBEAFE;color:#1D4ED8">MR</div><span style="font-weight:500">Muhammad Rasyid</span></div></td>
+                <td><span class="pill pill-blue" style="font-size:11px">UI/UX Designer</span></td>
+                <td>Desain Komunikasi Visual</td>
+                <td><code style="font-family:'DM Mono',monospace">3.60</code></td>
+                <td>16 Apr 2025</td>
+                <td><span class="pill pill-purple"><i class="bi bi-arrow-repeat" style="font-size:9px"></i> Diproses</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Muhammad Rasyid','UI/UX Designer','MR','#DBEAFE','#1D4ED8','Diproses','pill-purple')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+              <tr onclick="goDetail('Fitria Sari','Staff Keuangan','FS','#ECFDF5','#059669','Menunggu','pill-yellow')">
+                <td><div class="d-flex align-items-center gap-2"><div class="mini-avatar" style="background:#ECFDF5;color:#059669">FS</div><span style="font-weight:500">Fitria Sari</span></div></td>
+                <td><span class="pill pill-green" style="font-size:11px">Staff Keuangan</span></td>
+                <td>Ekonomi Pembangunan</td>
+                <td><code style="font-family:'DM Mono',monospace">3.68</code></td>
+                <td>16 Apr 2025</td>
+                <td><span class="pill pill-yellow"><i class="bi bi-hourglass-split" style="font-size:9px"></i> Menunggu</span></td>
+                <td><button class="btn-brand btn-sm" onclick="event.stopPropagation();goDetail('Fitria Sari','Staff Keuangan','FS','#ECFDF5','#059669','Menunggu','pill-yellow')"><i class="bi bi-eye"></i> Review</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ DETAIL PELAMAR ═══════════════ -->
+    <div class="page" id="page-detail">
+      <div class="pg-header" style="margin-bottom:16px">
+        <button class="btn-outline" onclick="showPage('pelamar',null)"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Pelamar</button>
+      </div>
+
+      <div class="profile-hero mb-3">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <div class="big-avatar" id="det-avatar">AS</div>
+          <div class="flex-grow-1">
+            <div style="font-size:20px;font-weight:700" id="det-name">Andi Saputra</div>
+            <div style="font-size:13px;opacity:.8;margin-top:3px">Melamar: <span id="det-posisi">Frontend Developer</span> &nbsp;·&nbsp; 10 Apr 2025</div>
+            <div style="margin-top:10px" id="det-status-wrap"><span class="pill" style="background:rgba(255,255,255,.2);color:#fff"><i class="bi bi-hourglass-split"></i> Menunggu Review</span></div>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn-success-soft" onclick="showToast('✓ Pelamar berhasil diterima!')"><i class="bi bi-check-lg"></i> Terima</button>
+            <button class="btn-danger-soft" onclick="showToast('✕ Pelamar ditolak.')"><i class="bi bi-x-lg"></i> Tolak</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-card mb-3">
+        <div class="card-head"><h6>Alur Seleksi</h6></div>
+        <div class="d-flex" style="padding:8px 0">
+          <div class="flow-step"><div class="flow-dot done"><i class="bi bi-check-lg"></i></div><div class="flow-label">Lamar</div></div>
+          <div class="flow-step"><div class="flow-dot current">2</div><div class="flow-label">Review CV</div></div>
+          <div class="flow-step"><div class="flow-dot wait">3</div><div class="flow-label">Wawancara</div></div>
+          <div class="flow-step"><div class="flow-dot wait" style="border-color:var(--border)">4</div><div class="flow-label">Keputusan</div></div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <div class="ui-card h-100">
+            <div class="card-head"><h6><i class="bi bi-person-fill me-2" style="color:var(--brand)"></i>Data Pribadi</h6></div>
+            <div class="row g-2">
+              <div class="col-6"><div class="info-box"><div class="info-key">Universitas</div><div class="info-val">Universitas Sebelas Maret</div></div></div>
+              <div class="col-6"><div class="info-box"><div class="info-key">Jurusan</div><div class="info-val" id="det-jurusan">Informatika</div></div></div>
+              <div class="col-6"><div class="info-box"><div class="info-key">IPK</div><div class="info-val" style="color:#1D4ED8;font-family:'DM Mono',monospace">3.87 / 4.00</div></div></div>
+              <div class="col-6"><div class="info-box"><div class="info-key">Angkatan</div><div class="info-val">2023</div></div></div>
+              <div class="col-6"><div class="info-box"><div class="info-key">Email</div><div class="info-val" style="font-size:12px;word-break:break-all" id="det-email">andi.s@uns.ac.id</div></div></div>
+              <div class="col-6"><div class="info-box"><div class="info-key">No. HP</div><div class="info-val">+62 812-3456-7890</div></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-lightning-fill me-2" style="color:#D97706"></i>Keahlian</h6></div>
+            <div>
+              <span class="skill-tag">React.js</span><span class="skill-tag">TypeScript</span><span class="skill-tag">Tailwind CSS</span><span class="skill-tag">Node.js</span><span class="skill-tag">Git</span><span class="skill-tag">Figma</span>
+            </div>
+          </div>
+          <div class="ui-card">
+            <div class="card-head"><h6><i class="bi bi-file-earmark-text me-2" style="color:#6366F1"></i>Dokumen</h6></div>
+            <div class="doc-row"><div class="d-flex align-items-center gap-2"><i class="bi bi-file-pdf" style="color:#DC2626;font-size:18px"></i><span style="font-size:13px">CV_Pelamar.pdf</span></div><button class="btn-outline btn-sm"><i class="bi bi-download"></i></button></div>
+            <div class="doc-row" style="border:none"><div class="d-flex align-items-center gap-2"><i class="bi bi-file-pdf" style="color:#DC2626;font-size:18px"></i><span style="font-size:13px">Portofolio.pdf</span></div><button class="btn-outline btn-sm"><i class="bi bi-download"></i></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ui-card">
+        <div class="card-head"><h6><i class="bi bi-envelope-open me-2" style="color:var(--brand)"></i>Surat Lamaran</h6></div>
+        <p style="font-size:13.5px;color:var(--muted);line-height:1.8;margin:0" id="det-surat">
+          Dengan hormat, saya melamar posisi ini dengan penuh keyakinan bahwa keahlian dan pengalaman saya dapat berkontribusi maksimal untuk perusahaan. Saya memiliki pengalaman di bidang yang relevan dan siap mengikuti proses seleksi lebih lanjut.
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══════════════ BUAT LOWONGAN ═══════════════ -->
+    <div class="page" id="page-tambah">
+      <div class="pg-header">
+        <div>
+          <h4>Buat Lowongan Baru</h4>
+          <p>Lowongan akan diverifikasi admin sebelum tampil ke mahasiswa</p>
+        </div>
+      </div>
+
+      <div class="ui-card mb-3">
+        <div class="d-flex align-items-center gap-3 flex-wrap" style="font-size:12px">
+          <div class="d-flex align-items-center gap-2"><div class="step-num active-step">1</div><span style="font-weight:600">Isi Formulir</span></div>
+          <i class="bi bi-chevron-right" style="color:var(--muted)"></i>
+          <div class="d-flex align-items-center gap-2"><div class="step-num">2</div><span style="color:var(--muted)">Review Admin</span></div>
+          <i class="bi bi-chevron-right" style="color:var(--muted)"></i>
+          <div class="d-flex align-items-center gap-2"><div class="step-num">3</div><span style="color:var(--muted)">Tayang ke Mahasiswa</span></div>
+        </div>
+        <div style="margin-top:12px;padding:10px 12px;background:#EEF3FF;border-radius:var(--radius-sm);font-size:12px;color:var(--brand);display:flex;gap:8px;align-items:flex-start">
+          <i class="bi bi-info-circle-fill" style="flex-shrink:0;margin-top:1px"></i>
+          <span>Setelah kamu kirim, lowongan ini masuk ke antrian review admin. Admin akan memverifikasi kelengkapan dan kesesuaian konten sebelum lowongan ditayangkan ke mahasiswa. Proses ini biasanya memakan waktu <strong>1×24 jam</strong>.</span>
+        </div>
+      </div>
+
+      <div class="ui-card mb-3">
+        <div class="card-head"><h6>Informasi Dasar</h6></div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Judul Posisi <span style="color:#DC2626">*</span></label>
+            <input type="text" class="form-control" placeholder="cth. Staff Keuangan Senior">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Departemen</label>
+            <select class="form-select">
+              <option>-- Pilih Departemen --</option>
+              <option>Engineering & IT</option>
+              <option>Keuangan & Akuntansi</option>
+              <option>Human Resources</option>
+              <option>Marketing & Sales</option>
+              <option>Operasional</option>
+              <option>Administrasi</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Tipe Pekerjaan</label>
+            <select class="form-select">
+              <option>Full-time</option><option>Part-time</option><option>Magang</option><option>Freelance</option><option>Kontrak</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Lokasi</label>
+            <select class="form-select">
+              <option>Jakarta</option><option>Bandung</option><option>Surabaya</option><option>Yogyakarta</option><option>Medan</option><option>Remote</option><option>Hybrid</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Rentang Gaji (jt/bln)</label>
+            <input type="text" class="form-control" placeholder="cth. 8 – 12">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Pendidikan Minimum</label>
+            <select class="form-select">
+              <option>SMA / SMK sederajat</option><option>D3 (Diploma)</option><option>S1 (Sarjana)</option><option>S2 (Magister)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Jurusan yang Diutamakan</label>
+            <input type="text" class="form-control" placeholder="cth. Akuntansi, Manajemen, atau semua jurusan">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Deskripsi Pekerjaan <span style="color:#DC2626">*</span></label>
+            <textarea class="form-control" rows="4" placeholder="Jelaskan tanggung jawab dan tugas utama posisi ini..."></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Kualifikasi <span style="color:#DC2626">*</span></label>
+            <textarea class="form-control" rows="4" placeholder="Persyaratan pendidikan, keahlian, dan pengalaman yang dibutuhkan..."></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Batas Lamaran</label>
+            <input type="date" class="form-control">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Kuota Penerimaan</label>
+            <input type="number" class="form-control" placeholder="cth. 3">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Minimum IPK</label>
+            <input type="text" class="form-control" placeholder="cth. 3.00">
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2">
+        <button class="btn-outline" onclick="showPage('lowongan',null)">Batal</button>
+        <button class="btn-brand" onclick="handleSubmit()"><i class="bi bi-send"></i> Kirim untuk Review Admin</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PROFIL ═══════════════ -->
+    <div class="page" id="page-profil">
+      <div class="pg-header">
+        <div><h4>Profil Perusahaan</h4><p>Informasi yang terlihat oleh para pelamar</p></div>
+        <button class="btn-brand" onclick="showToast('✓ Profil berhasil disimpan!')"><i class="bi bi-check-lg"></i> Simpan Perubahan</button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-8">
+          <div class="ui-card">
+            <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+              <div style="width:64px;height:64px;border-radius:var(--radius);background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:700;flex-shrink:0">AC</div>
+              <div>
+                <div style="font-size:15px;font-weight:700">AirCrops Indonesia</div>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">Bergabung sejak Maret 2022</div>
+                <button class="btn-outline btn-sm mt-2"><i class="bi bi-upload"></i> Ganti Logo</button>
+              </div>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Nama Perusahaan</label><input type="text" class="form-control" value="AirCrops Indonesia"></div>
+              <div class="col-md-6"><label class="form-label">Bidang Industri</label><select class="form-select"><option>Teknologi & Agrikultur</option><option>Teknologi</option><option>Keuangan</option></select></div>
+              <div class="col-md-6"><label class="form-label">Website</label><input type="text" class="form-control" value="https://aircrops.id"></div>
+              <div class="col-md-6"><label class="form-label">Ukuran Perusahaan</label><select class="form-select"><option>50–200 karyawan</option><option>1–50</option><option>200–1000</option></select></div>
+              <div class="col-12"><label class="form-label">Deskripsi Perusahaan</label><textarea class="form-control" rows="4">AirCrops Indonesia adalah perusahaan teknologi agrikultur yang berfokus pada solusi digital untuk petani dan distributor hasil bumi.</textarea></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6>Statistik Profil</h6></div>
+            <div class="d-flex flex-column gap-2">
+              <div class="stat-card" style="padding:14px"><div class="stat-val" style="color:var(--brand)">312</div><div class="stat-label">Dilihat pelamar bulan ini</div></div>
+              <div class="stat-card" style="padding:14px"><div class="stat-val">24</div><div class="stat-label">Total lowongan dibuat</div></div>
+              <div class="stat-card" style="padding:14px"><div class="stat-val" style="color:#16A34A">4.8 ★</div><div class="stat-label">Rating dari 18 ulasan</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PENGATURAN ═══════════════ -->
+    <div class="page" id="page-pengaturan">
+      <div class="pg-header">
+        <div><h4>Pengaturan Akun</h4><p>Kelola keamanan dan preferensi akun AirCrops</p></div>
+        <button class="btn-brand" onclick="showToast('✓ Pengaturan berhasil disimpan!')"><i class="bi bi-check-lg"></i> Simpan</button>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-8">
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-person-fill me-2" style="color:var(--brand)"></i>Informasi Akun</h6></div>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Nama Pengguna</label><input type="text" class="form-control" value="AirCrops Indonesia"></div>
+              <div class="col-md-6"><label class="form-label">Email Akun</label><input type="email" class="form-control" value="admin@aircrops.id"></div>
+              <div class="col-md-6"><label class="form-label">No. Telepon</label><input type="text" class="form-control" value="+62 21-1234-5678"></div>
+              <div class="col-md-6"><label class="form-label">Zona Waktu</label><select class="form-select"><option>WIB — Jakarta (UTC+7)</option><option>WITA — Makassar (UTC+8)</option></select></div>
+            </div>
+          </div>
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-shield-lock-fill me-2" style="color:#6366F1"></i>Keamanan</h6></div>
+            <div class="row g-3">
+              <div class="col-md-6"><label class="form-label">Password Saat Ini</label><input type="password" class="form-control" placeholder="Masukkan password lama"></div>
+              <div class="col-md-6"></div>
+              <div class="col-md-6"><label class="form-label">Password Baru</label><input type="password" class="form-control" placeholder="Minimal 8 karakter"></div>
+              <div class="col-md-6"><label class="form-label">Konfirmasi Password Baru</label><input type="password" class="form-control" placeholder="Ulangi password baru"></div>
+            </div>
+          </div>
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-bell-fill me-2" style="color:#D97706"></i>Preferensi Notifikasi</h6></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:500">Pelamar baru masuk</div><div style="font-size:12px;color:var(--muted)">Notif setiap ada mahasiswa melamar</div></div><div class="toggle-switch active" onclick="toggleSwitch(this)"></div></div>
+              <div style="border-top:1px solid var(--border)"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:500">Status lowongan diperbarui admin</div><div style="font-size:12px;color:var(--muted)">Notif saat lowongan disetujui atau ditolak</div></div><div class="toggle-switch active" onclick="toggleSwitch(this)"></div></div>
+              <div style="border-top:1px solid var(--border)"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:500">Pengingat batas lamaran</div><div style="font-size:12px;color:var(--muted)">Ingatkan 3 hari sebelum lowongan ditutup</div></div><div class="toggle-switch" onclick="toggleSwitch(this)"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-star-fill me-2" style="color:#D97706"></i>Paket Saat Ini</h6></div>
+            <div style="background:linear-gradient(135deg,var(--brand),#6366F1);border-radius:var(--radius-sm);padding:16px;color:#fff;margin-bottom:12px">
+              <div style="font-size:11px;opacity:.8;margin-bottom:4px">Paket Aktif</div>
+              <div style="font-size:18px;font-weight:700">Business Pro</div>
+              <div style="font-size:12px;opacity:.8;margin-top:4px">Aktif hingga 31 Des 2025</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Lowongan aktif</span><span style="font-weight:600">5 / 10</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:50%;background:var(--brand)"></div></div>
+              <div style="display:flex;justify-content:space-between;margin-top:4px"><span style="color:var(--muted)">Pelamar bulan ini</span><span style="font-weight:600">47 / 200</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:23%;background:#6366F1"></div></div>
+            </div>
+            <button class="btn-brand w-100 mt-3"><i class="bi bi-arrow-up-circle"></i> Upgrade Paket</button>
+          </div>
+          <div class="ui-card" style="border-color:#FECACA">
+            <div class="card-head"><h6><i class="bi bi-exclamation-triangle-fill me-2" style="color:#DC2626"></i>Zona Berbahaya</h6></div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Tindakan berikut bersifat permanen dan tidak dapat dibatalkan.</p>
+            <div class="d-flex flex-column gap-2">
+              <button class="btn-danger-soft w-100" onclick="showToast('⚠ Fitur ini memerlukan konfirmasi lebih lanjut.')"><i class="bi bi-trash3"></i> Hapus Semua Data Lowongan</button>
+              <button class="btn-danger-soft w-100" onclick="showToast('⚠ Fitur ini memerlukan konfirmasi lebih lanjut.')"><i class="bi bi-x-octagon"></i> Nonaktifkan Akun</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><i class="bi bi-check-circle-fill"></i><span id="toast-msg">Berhasil!</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ─── Navigation ───────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+
+  // update sidebar active
+  document.querySelectorAll('.nav-link-item').forEach(l => l.classList.remove('active'));
+  if (el) {
+    el.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-link-item').forEach(l => {
+      if (l.getAttribute('onclick')?.includes("'" + id + "'")) l.classList.add('active');
+    });
+  }
+
+  // scroll top
+  document.getElementById('content').scrollTop = 0;
+  window.scrollTo(0, 0);
+
+  // close mobile sidebar
+  closeSidebar();
+}
+
+// ─── Detail Pelamar ───────────────────────────
+function goDetail(name, posisi, inits, bgColor, textColor, status, statusClass) {
+  // Set avatar
+  const av = document.getElementById('det-avatar');
+  av.textContent = inits;
+  av.style.background = 'rgba(255,255,255,.25)';
+
+  document.getElementById('det-name').textContent = name;
+  document.getElementById('det-posisi').textContent = posisi;
+
+  // Status badge
+  const statusWrap = document.getElementById('det-status-wrap');
+  const icons = { 'Menunggu': 'bi-hourglass-split', 'Diterima': 'bi-check-circle', 'Ditolak': 'bi-x-circle', 'Diproses': 'bi-arrow-repeat' };
+  statusWrap.innerHTML = `<span class="pill" style="background:rgba(255,255,255,.2);color:#fff"><i class="bi ${icons[status] || 'bi-circle'}"></i> ${status}</span>`;
+
+  // Navigate
+  showPage('detail', null);
+  // Remove 'active' from sidebar since detail is not in sidebar
+  document.querySelectorAll('.nav-link-item').forEach(l => l.classList.remove('active'));
+  document.querySelectorAll('.nav-link-item').forEach(l => {
+    if (l.getAttribute('onclick')?.includes("'pelamar'")) l.classList.add('active');
+  });
+}
+
+// ─── Lowongan filter ──────────────────────────
+function filterLw(filter, el) {
+  document.querySelectorAll('.nav-pill-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.lw-col').forEach(col => {
+    if (filter === 'all' || col.dataset.status === filter) {
+      col.style.display = '';
+    } else {
+      col.style.display = 'none';
+    }
+  });
+}
+
+// ─── Sidebar mobile ───────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('mob-overlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mob-overlay').classList.remove('show');
+}
+
+// ─── Notif dropdown ───────────────────────────
+function toggleNotif() {
+  document.getElementById('notif-dd').classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#notif-trigger') && !e.target.closest('#notif-dd')) {
+    document.getElementById('notif-dd').classList.remove('open');
+  }
+});
+
+// ─── Toast ────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── Toggle switch ────────────────────────────
+function toggleSwitch(el) { el.classList.toggle('active'); }
+
+// ─── Logout ───────────────────────────────────
+function doLogout() {
+  if (confirm('Anda yakin ingin keluar?')) {
+    localStorage.removeItem('userData');
+    window.location.href = 'index.html';
+  }
+}
+
+// ─── Form submit ──────────────────────────────
+function handleSubmit() {
+  showToast('✓ Lowongan berhasil dikirim! Menunggu review admin.');
+  setTimeout(() => showPage('lowongan', null), 800);
+}
+
+// ─── Init animations ──────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Counter animation
+  function countUp(id, target) {
+    let n = 0;
+    const step = Math.ceil(target / 30);
+    const el = document.getElementById(id);
+    const t = setInterval(() => {
+      n = Math.min(n + step, target);
+      el.textContent = n;
+      if (n >= target) clearInterval(t);
+    }, 30);
+  }
+  setTimeout(() => {
+    countUp('sv1', 5);
+    countUp('sv2', 47);
+    countUp('sv3', 2);
+    countUp('sv4', 6);
+  }, 200);
+
+  // Bar chart
+  const bars = [
+    {id:'b1', val:80}, {id:'b2', val:100}, {id:'b3', val:55},
+    {id:'b4', val:47}, {id:'b5', val:20}, {id:'b6', val:14}
+  ];
+  setTimeout(() => {
+    bars.forEach((b, i) => {
+      setTimeout(() => {
+        document.getElementById(b.id).style.height = b.val + 'px';
+      }, i * 80);
+    });
+  }, 400);
+
+  // Progress bars
+  setTimeout(() => {
+    document.getElementById('p1').style.width = '26%';
+    document.getElementById('p2').style.width = '38%';
+    document.getElementById('p3').style.width = '13%';
+    document.getElementById('p4').style.width = '23%';
+  }, 500);
+
+  // Mobile hamburger visibility
+  function checkMobile() {
+    document.getElementById('menu-toggle').style.display = window.innerWidth < 769 ? 'grid' : 'none';
+  }
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+
+  // Session
+  try {
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    if (userData.name) {
+      document.getElementById('greetName').textContent = userData.name;
+      document.getElementById('topbarAvatar').textContent = userData.name.substring(0,2).toUpperCase();
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
