@@ -7,6 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
   <style>
     :root {
       --brand:   #1A56DB;
@@ -216,7 +217,7 @@
     .notif-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
     /* ── PAGES ────────────────────────────────── */
-    #content { padding: 24px; flex: 1; }
+    #content { padding: 24px; flex: 1; scroll-behavior: smooth; }
     .page { display: none; }
     .page.active { display: block; animation: fadeUp .25s ease; }
     @keyframes fadeUp {
@@ -245,7 +246,7 @@
     }
     .card-head h6 { font-size: 13px; font-weight: 700; margin: 0; }
 
-    /* ── STAT CARDS ───────────────────────────── */
+    /* ── STAT CARDS ─────────────────────���─────── */
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -427,7 +428,7 @@
     .toggle-switch.active { background: var(--brand); }
     .toggle-switch.active::after { transform: translateX(18px); }
 
-    /* ── BUTTONS ──────────────────────────────── */
+    /* ── BUTTONS ────────────────────────��─────── */
     .btn-brand {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--brand); color: #fff;
@@ -504,6 +505,13 @@
       background: rgba(26, 86, 219, 0.02);
     }
     .doc-upload-area i { font-size: 32px; color: var(--brand); margin-bottom: 10px; }
+
+    /* Map container for location */
+    #company-map {
+      height: 350px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 <body>
@@ -710,9 +718,9 @@
 
       <ul class="nav nav-pills mb-3" style="gap:6px" id="lw-filter-tabs">
         <li class="nav-item"><a class="nav-pill-tab active" onclick="filterLw('all',this)" data-filter="all">Semua (<span id="count-all">0</span>)</a></li>
-        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('aktif',this)" data-filter="aktif">Aktif (<span id="count-aktif">0</span>)</a></li>
+        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('active',this)" data-filter="active">Aktif (<span id="count-aktif">0</span>)</a></li>
         <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('pending',this)" data-filter="pending">Pending (<span id="count-pending">0</span>)</a></li>
-        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('ditutup',this)" data-filter="ditutup">Ditutup (<span id="count-ditutup">0</span>)</a></li>
+        <li class="nav-item"><a class="nav-pill-tab" onclick="filterLw('closed',this)" data-filter="closed">Ditutup (<span id="count-ditutup">0</span>)</a></li>
       </ul>
 
       <div class="row g-3" id="lw-grid">
@@ -998,190 +1006,69 @@
     <!-- ═══════════════ PROFIL ═══════════════ -->
     <div class="page" id="page-profil">
       <div class="pg-header">
-          <div class="pg-header">
         <div>
           <h4>Profil Perusahaan</h4>
-          <p>Informasi yang terlihat oleh para pelamar</p>
+          <p>Kelola informasi dan data perusahaan Anda</p>
         </div>
-        <button class="btn-brand" onclick="handleSaveProfile()"><i class="bi bi-check-lg"></i> Simpan Perubahan</button>
       </div>
-      <div class="row g-3">
-        <div class="col-md-8">
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6><i class="bi bi-building me-2" style="color:var(--brand)"></i>Informasi Umum</h6></div>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Nama Perusahaan <span style="color:#DC2626">*</span></label>
-                <input type="text" class="form-control" id="prof-company-name" required>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Bidang Industri</label>
-                <select class="form-select" id="prof-industry">
-                  <option value="">-- Pilih Industri --</option>
-                  <option value="Technology">Teknologi & IT</option>
-                  <option value="Finance">Keuangan & Perbankan</option>
-                  <option value="Manufacturing">Manufaktur</option>
-                  <option value="Retail">Ritel & E-Commerce</option>
-                  <option value="Healthcare">Kesehatan</option>
-                  <option value="Education">Pendidikan</option>
-                  <option value="Energy">Energi & Utilities</option>
-                  <option value="Telecom">Telekomunikasi</option>
-                  <option value="Automotive">Otomotif</option>
-                  <option value="Agriculture">Pertanian</option>
-                  <option value="Other">Lainnya</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Ukuran Perusahaan</label>
-                <select class="form-select" id="prof-size">
-                  <option value="">-- Pilih Ukuran --</option>
-                  <option value="1-50">1–50 karyawan (Startup)</option>
-                  <option value="51-250">51–250 karyawan (UKM)</option>
-                  <option value="251-1000">251–1000 karyawan (Menengah)</option>
-                  <option value="1000+">1000+ karyawan (Enterprise)</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Status Perusahaan</label>
-                <select class="form-select" id="prof-status">
-                  <option value="private">Perusahaan Swasta</option>
-                  <option value="public">Perusahaan Publik</option>
-                  <option value="government">BUMN / BUMD</option>
-                  <option value="nonprofit">Organisasi Non-Profit</option>
-                </select>
-              </div>
-              <div class="col-12">
-                <label class="form-label">Alamat Kantor Pusat</label>
-                <input type="text" class="form-control" id="prof-address" placeholder="Jl. ... No. ..." >
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Kota</label>
-                <input type="text" class="form-control" id="prof-city" placeholder="Jakarta">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Provinsi</label>
-                <input type="text" class="form-control" id="prof-province" placeholder="DKI Jakarta">
-              </div>
+
+      <!-- Profile Tabs -->
+      <ul class="nav nav-tabs mb-3" style="gap:0">
+        <li class="nav-item"><a class="prof-tab nav-link active" style="border-bottom:3px solid var(--brand);color:var(--brand);cursor:pointer" onclick="switchProfTab('info',this)">Informasi Dasar</a></li>
+        <li class="nav-item"><a class="prof-tab nav-link" style="border-bottom:3px solid transparent;color:var(--muted);cursor:pointer" onclick="switchProfTab('lokasi',this)">Lokasi Kantor</a></li>
+      </ul>
+
+      <!-- Tab: Informasi Dasar -->
+      <div class="prof-tab-content" id="tab-info">
+        <div class="ui-card mb-3">
+          <div class="card-head"><h6><i class="bi bi-building me-2" style="color:var(--brand)"></i>Data Perusahaan</h6></div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Nama Perusahaan <span style="color:#DC2626">*</span></label>
+              <input type="text" class="form-control" id="prof-company-name" placeholder="Nama perusahaan">
             </div>
-          </div>
-
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6><i class="bi bi-globe me-2" style="color:#6366F1"></i>Informasi Kontak</h6></div>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Website</label>
-                <input type="url" class="form-control" id="prof-website" placeholder="https://www.perusahaan.com">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">No. Telepon</label>
-                <input type="tel" class="form-control" id="prof-phone" placeholder="+62-21-xxxx-xxxx">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Email Kantor</label>
-                <input type="email" class="form-control" placeholder="hr@perusahaan.com">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">LinkedIn Company</label>
-                <input type="url" class="form-control" placeholder="https://linkedin.com/company/..." id="prof-linkedin">
-              </div>
+            <div class="col-md-6">
+              <label class="form-label">Industri</label>
+              <input type="text" class="form-control" id="prof-industry" placeholder="cth. Teknologi, Manufaktur, dll">
             </div>
-          </div>
-
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6><i class="bi bi-file-text me-2" style="color:#D97706"></i>Tentang Perusahaan</h6></div>
-            <label class="form-label">Deskripsi / Visi Misi Perusahaan</label>
-            <textarea class="form-control" id="prof-description" rows="5" placeholder="Jelaskan tentang perusahaan Anda, visi, misi, produk/layanan utama..."></textarea>
-            <small style="color:var(--muted);display:block;margin-top:6px">Tip: Tuliskan info yang akan membuat pelamar tertarik dengan perusahaan Anda</small>
-          </div>
-
-          <div class="ui-card">
-            <div class="card-head"><h6><i class="bi bi-geo-alt me-2" style="color:#16A34A"></i>Lokasi di Peta</h6></div>
-            <div id="company-map" style="width:100%;height:300px;border-radius:var(--radius-sm);background:var(--surface2)"></div>
-            <small style="color:var(--muted);display:block;margin-top:8px">Peta kantor pusat perusahaan Anda</small>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6><i class="bi bi-star-fill me-2" style="color:#D97706"></i>Logo Perusahaan</h6></div>
-            <div style="width:100%;aspect-ratio:1;border:2px dashed var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;background:var(--surface2);margin-bottom:12px;cursor:pointer;transition:all .15s" id="logo-preview" onclick="document.getElementById('logo-input').click()">
-              <div style="text-align:center">
-                <i class="bi bi-image" style="font-size:32px;color:var(--muted)"></i>
-                <p style="font-size:12px;color:var(--muted);margin:8px 0 0 0">Klik untuk upload logo</p>
-              </div>
+            <div class="col-md-6">
+              <label class="form-label">Website</label>
+              <input type="url" class="form-control" id="prof-website" placeholder="https://www.perusahaan.com">
             </div>
-            <input type="file" id="logo-input" accept="image/*" style="display:none">
-          </div>
-
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6>Statistik Profil</h6></div>
-            <div class="d-flex flex-column gap-2">
-              <div class="stat-card" style="padding:14px">
-                <div class="stat-val" style="color:var(--brand)" id="prof-views">0</div>
-                <div class="stat-label">Dilihat pelamar bulan ini</div>
-              </div>
-              <div class="stat-card" style="padding:14px">
-                <div class="stat-val" id="prof-total-jobs">0</div>
-                <div class="stat-label">Total lowongan dibuat</div>
-              </div>
-              <div class="stat-card" style="padding:14px">
-                <div class="stat-val" style="color:#16A34A" id="prof-rating">4.8 ★</div>
-                <div class="stat-label">Rating dari ulasan</div>
-              </div>
+            <div class="col-md-6">
+              <label class="form-label">No. Telepon Kantor</label>
+              <input type="tel" class="form-control" id="prof-phone" placeholder="+62-21-xxxx-xxxx">
             </div>
-          </div>
-
-          <div class="ui-card">
-            <div class="card-head"><h6><i class="bi bi-info-circle me-2"></i>Tips Profil</h6></div>
-            <ul style="font-size:12px;color:var(--muted);margin:0;padding-left:16px">
-              <li style="margin-bottom:8px">Isi semua informasi untuk meningkatkan kredibilitas</li>
-              <li style="margin-bottom:8px">Upload logo untuk identitas visual yang jelas</li>
-              <li style="margin-bottom:8px">Deskripsi yang menarik meningkatkan minat pelamar</li>
-              <li>Perbarui info kontak agar mudah dihubungi</li>
-            </ul>
+            <div class="col-12">
+              <label class="form-label">Alamat Kantor</label>
+              <textarea class="form-control" id="prof-address" rows="3" placeholder="Jalan, No, Kota, Provinsi, Kode Pos"></textarea>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Deskripsi Perusahaan</label>
+              <textarea class="form-control" id="prof-description" rows="4" placeholder="Jelaskan tentang perusahaan Anda, visi, misi, dan lainnya..."></textarea>
+            </div>
           </div>
         </div>
       </div>
-  </main>
-</div>
 
-<!-- TOAST -->
-<div id="toast"><i class="bi bi-check-circle-fill"></i><span id="toast-msg">Berhasil!</span></div>
-
-<!-- Document Upload Modal -->
-<div class="modal fade" id="documentModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Upload Dokumen</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <label class="form-label">Jenis Dokumen <span style="color:#DC2626">*</span></label>
-        <select class="form-select mb-3" id="doc-type">
-          <option value="">-- Pilih Jenis --</option>
-          <option value="mou">MoU (Memorandum of Understanding)</option>
-          <option value="proposal">Proposal Kerja Sama</option>
-          <option value="agreement">Surat Kerjasama</option>
-          <option value="other">Dokumen Lainnya</option>
-        </select>
-
-        <label class="form-label">File <span style="color:#DC2626">*</span></label>
-        <div class="doc-upload-area" onclick="document.getElementById('modal-doc-input').click()">
-          <i class="bi bi-cloud-arrow-up"></i>
-          <p style="margin:8px 0 0 0;font-size:12px" id="upload-status">Klik atau drag file ke sini</p>
-          <input type="file" id="modal-doc-input" style="display:none" accept=".pdf,.doc,.docx" onchange="handleModalDocumentUpload(event)">
+      <!-- Tab: Lokasi Kantor (Map) -->
+      <div class="prof-tab-content" id="tab-lokasi" style="display:none;">
+        <div class="ui-card">
+          <div class="card-head"><h6><i class="bi bi-geo-alt me-2" style="color:var(--brand)"></i>Peta Lokasi Kantor</h6></div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Klik pada peta untuk menentukan lokasi kantor Anda</p>
+          <div id="company-map"></div>
+          <small style="color:var(--muted);display:block;margin-top:12px">
+            <i class="bi bi-info-circle"></i> Lokasi akan membantu mahasiswa mengetahui letak kantor perusahaan Anda.
+          </small>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitDocument()">Upload</button>
+
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button class="btn-brand" onclick="handleSaveProfile()"><i class="bi bi-check-lg"></i> Simpan Profil</button>
       </div>
     </div>
-  </div>
-</div>
 
-          <!-- ═══════════════ PENGATURAN ═══════════════ -->
+    <!-- ═══════════════ PENGATURAN ═══════════════ -->
     <div class="page" id="page-pengaturan">
       <div class="pg-header">
         <div>
@@ -1230,136 +1117,119 @@
                 <label class="form-label">Password Saat Ini</label>
                 <div class="input-group mb-2">
                   <input type="password" class="form-control" id="set-current-pass" placeholder="Masukkan password lama">
-                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-current-pass')">
-                    <i class="bi bi-eye"></i>
-                  </button>
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-current-pass')"><i class="bi bi-eye"></i></button>
                 </div>
               </div>
-              <div class="col-md-6"></div>
+              <div class="col-md-6">
+                <label class="form-label"></label>
+              </div>
               <div class="col-md-6">
                 <label class="form-label">Password Baru</label>
                 <div class="input-group mb-2">
-                  <input type="password" class="form-control" id="set-new-pass" placeholder="Minimal 8 karakter">
-                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-new-pass')">
-                    <i class="bi bi-eye"></i>
-                  </button>
+                  <input type="password" class="form-control" id="set-new-pass" placeholder="Biarkan kosong jika tidak ingin mengubah">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-new-pass')"><i class="bi bi-eye"></i></button>
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Konfirmasi Password Baru</label>
                 <div class="input-group mb-2">
-                  <input type="password" class="form-control" id="set-confirm-pass" placeholder="Ulangi password baru">
-                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-confirm-pass')">
-                    <i class="bi bi-eye"></i>
-                  </button>
+                  <input type="password" class="form-control" id="set-confirm-pass" placeholder="Konfirmasi password baru">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-confirm-pass')"><i class="bi bi-eye"></i></button>
                 </div>
               </div>
-            </div>
-            <small style="color:var(--muted);display:block;margin-top:12px">
-              <i class="bi bi-info-circle"></i> Password harus minimal 8 karakter, kombinasi huruf besar, kecil, angka, dan simbol.
-            </small>
-          </div>
-
-          <!-- Notifications -->
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6><i class="bi bi-bell me-2" style="color:#D97706"></i>Preferensi Notifikasi</h6></div>
-            <div style="display:flex;flex-direction:column;gap:16px">
-              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
-                <div>
-                  <div style="font-size:13px;font-weight:500">Pelamar Baru</div>
-                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Notifikasi ketika ada mahasiswa melamar posisi</div>
-                </div>
-                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
-                <div>
-                  <div style="font-size:13px;font-weight:500">Status Lowongan Diperbarui</div>
-                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Notifikasi saat lowongan disetujui atau ditolak admin</div>
-                </div>
-                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
-                <div>
-                  <div style="font-size:13px;font-weight:500">Pengingat Batas Lamaran</div>
-                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Ingatkan 3 hari sebelum lowongan ditutup</div>
-                </div>
-                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
-                <div>
-                  <div style="font-size:13px;font-weight:500">Laporan Mingguan</div>
-                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Ringkasan performa lowongan setiap Senin</div>
-                </div>
-                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div>
-                  <div style="font-size:13px;font-weight:500">Update Fitur & Promo</div>
-                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Info tentang fitur baru dan penawaran menarik</div>
-                </div>
-                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <div class="col-12">
+                <small style="color:var(--muted)">
+                  <i class="bi bi-info-circle"></i> Password minimal 6 karakter. Gunakan kombinasi huruf, angka, dan simbol untuk keamanan lebih baik.
+                </small>
               </div>
             </div>
           </div>
 
-          <!-- Privacy & Data -->
+          <!-- Two-Factor Auth -->
           <div class="ui-card">
-            <div class="card-head"><h6><i class="bi bi-shield-check me-2" style="color:#16A34A"></i>Privasi & Data</h6></div>
-            <div style="display:flex;flex-direction:column;gap:14px;font-size:12px">
-              <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
-                <div style="font-weight:600;margin-bottom:4px"><i class="bi bi-check-circle me-2" style="color:var(--success)"></i>Data Perusahaan Tersimpan Aman</div>
-                <div style="color:var(--muted)">Informasi perusahaan Anda dienkripsi dan disimpan dengan standar keamanan internasional.</div>
+            <div class="card-head"><h6><i class="bi bi-shield-check me-2" style="color:#16A34A"></i>Keamanan Dua Faktor</h6></div>
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <p style="margin:0;font-weight:600">Aktifkan Autentikasi Dua Faktor</p>
+                <small style="color:var(--muted)">Tambah lapisan keamanan ekstra untuk akun Anda</small>
               </div>
-              <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
-                <div style="font-weight:600;margin-bottom:4px"><i class="bi bi-file-earmark-text me-2" style="color:var(--brand)"></i>Kebijakan Privasi</div>
-                <div style="color:var(--muted)">Baca <a href="#" style="color:var(--brand);text-decoration:none">kebijakan privasi kami</a> untuk informasi lengkap tentang bagaimana kami mengelola data Anda.</div>
-              </div>
+              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
             </div>
           </div>
         </div>
 
-        <!-- Sidebar -->
         <div class="col-lg-3">
-          <!-- Activity Log -->
-          <div class="ui-card mb-3">
-            <div class="card-head"><h6><i class="bi bi-clock-history me-2"></i>Aktivitas Terakhir</h6></div>
-            <div style="font-size:12px;color:var(--muted)">
-              <div style="padding:8px 0;border-bottom:1px solid var(--border)">
-                <div style="font-weight:500;color:var(--text)">Login</div>
-                <div style="font-size:11px;margin-top:2px">Hari ini, 09:30</div>
+          <div class="ui-card">
+            <div class="card-head"><h6><i class="bi bi-info-circle me-2" style="color:#D97706"></i>Info Akun</h6></div>
+            <div style="font-size:13px;line-height:1.8">
+              <div style="margin-bottom:12px">
+                <strong style="color:var(--text);display:block;margin-bottom:3px">Status Verifikasi</strong>
+                <span class="pill" style="background:#FEE2E2;color:#DC2626"><i class="bi bi-x-circle" style="font-size:9px"></i> Belum Verifikasi</span>
               </div>
-              <div style="padding:8px 0;border-bottom:1px solid var(--border)">
-                <div style="font-weight:500;color:var(--text)">Membuat lowongan</div>
-                <div style="font-size:11px;margin-top:2px">Kemarin, 14:20</div>
+              <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+              <div style="margin-bottom:12px">
+                <strong style="color:var(--text);display:block;margin-bottom:3px">Akun Dibuat</strong>
+                <span style="color:var(--muted)">Baru saja</span>
               </div>
-              <div style="padding:8px 0;border-bottom:1px solid var(--border)">
-                <div style="font-weight:500;color:var(--text)">Update profil</div>
-                <div style="font-size:11px;margin-top:2px">2 hari lalu</div>
+              <div>
+                <strong style="color:var(--text);display:block;margin-bottom:3px">Login Terakhir</strong>
+                <span style="color:var(--muted)">Baru saja</span>
               </div>
-              <div style="padding:8px 0">
-                <div style="font-weight:500;color:var(--text)">Ubah password</div>
-                <div style="font-size:11px;margin-top:2px">5 hari lalu</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Danger Zone -->
-          <div class="ui-card" style="border-color:#FECACA">
-            <div class="card-head"><h6><i class="bi bi-exclamation-triangle-fill me-2" style="color:#DC2626"></i>Zona Berbahaya</h6></div>
-            <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Tindakan berikut bersifat permanen dan tidak dapat dibatalkan.</p>
-            <div class="d-flex flex-column gap-2">
-              <button class="btn-danger-soft w-100" onclick="showToast('⚠ Fitur ini memerlukan konfirmasi lebih lanjut.')">
-                <i class="bi bi-trash3"></i> Hapus Semua Data Lowongan
-              </button>
-              <button class="btn-danger-soft w-100" onclick="showToast('⚠ Hubungi admin untuk menonaktifkan akun')">
-                <i class="bi bi-x-octagon"></i> Nonaktifkan Akun
-              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+  </main>
+</div>
+
+<!-- Document Upload Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Upload Dokumen Perusahaan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Jenis Dokumen <span style="color:#DC2626">*</span></label>
+            <select class="form-select" id="doc-type">
+              <option value="">-- Pilih Jenis --</option>
+              <option value="mou">MoU (Memorandum of Understanding)</option>
+              <option value="proposal">Proposal Kerja Sama</option>
+              <option value="agreement">Surat Kerjasama</option>
+              <option value="other">Dokumen Lainnya</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">File Dokumen <span style="color:#DC2626">*</span></label>
+            <div class="doc-upload-area" onclick="document.getElementById('modal-doc-input').click()">
+              <i class="bi bi-cloud-arrow-up"></i>
+              <p style="margin:8px 0 0 0;font-size:12px" id="upload-status">Klik atau drag file ke sini</p>
+              <p style="font-size:11px;color:var(--muted);margin:4px 0 0 0">Format: PDF, DOC, DOCX (Maks 10MB)</p>
+              <input type="file" id="modal-doc-input" style="display:none" accept=".pdf,.doc,.docx" onchange="handleModalDocumentUpload(event)">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-primary" onclick="submitDocument()">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast">
+  <span id="toast-msg"></span>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script src="dashboard-app.js"></script>
 </body>
 </html>
