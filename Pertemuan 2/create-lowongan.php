@@ -31,14 +31,36 @@ try {
         exit;
     }
 
+    // Optional fields
     $position_type = trim($data['position_type'] ?? 'Full-time');
+    $department = trim($data['department'] ?? '');
     $location = trim($data['location'] ?? '');
-    $salary_min = intval($data['salary_min'] ?? 0);
-    $salary_max = intval($data['salary_max'] ?? 0);
+    $salary_range = trim($data['salary_range'] ?? '');
+    $education = trim($data['education'] ?? '');
+    $major = trim($data['major'] ?? '');
+    $min_ipk = !empty($data['min_ipk']) ? floatval($data['min_ipk']) : 0.00;
+    $quota = !empty($data['quota']) ? intval($data['quota']) : 0;
     $deadline = !empty($data['deadline']) ? $data['deadline'] : null;
 
-    $query = "INSERT INTO job_postings (company_id, title, description, requirements, position_type, location, salary_min, salary_max, status, deadline, created_at) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, NOW())";
+    // Query with all fields from database schema
+    $query = "INSERT INTO job_postings (
+                company_id, 
+                title, 
+                description, 
+                position_type, 
+                department,
+                location, 
+                salary_range, 
+                education, 
+                major,
+                requirements, 
+                min_ipk, 
+                quota,
+                deadline, 
+                status, 
+                created_at
+              ) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())";
     
     $stmt = $conn->prepare($query);
     
@@ -48,9 +70,24 @@ try {
         exit;
     }
 
-    $stmt->bind_param('isssssii', 
-        $company_id, $title, $description, $requirements, 
-        $position_type, $location, $salary_min, $salary_max, $deadline
+    // Bind parameters: i=integer, s=string, d=double
+    // Order: company_id(i), title(s), description(s), position_type(s), department(s), 
+    //        location(s), salary_range(s), education(s), major(s), requirements(s), 
+    //        min_ipk(d), quota(i), deadline(s)
+    $stmt->bind_param('issssssssssdis',
+        $company_id,
+        $title,
+        $description,
+        $position_type,
+        $department,
+        $location,
+        $salary_range,
+        $education,
+        $major,
+        $requirements,
+        $min_ipk,
+        $quota,
+        $deadline
     );
 
     if ($stmt->execute()) {
