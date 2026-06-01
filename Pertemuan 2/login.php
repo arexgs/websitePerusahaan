@@ -1,12 +1,10 @@
 <?php
-// Enable error reporting untuk debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
 header('Content-Type: application/json');
 require_once 'config.php';
 
-// Fungsi error handler
 function sendError($message, $statusCode = 400) {
     http_response_code($statusCode);
     echo json_encode(['success' => false, 'message' => $message]);
@@ -62,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo json_encode([
                         'success' => true,
                         'message' => 'Login berhasil',
+                        'company_id' => $company['id'],
+                        'company_name' => $company['name'],
                         'redirect' => 'dashboard.html'
                     ]);
                 } else {
@@ -100,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     echo json_encode([
                         'success' => true,
                         'message' => 'Login berhasil',
+                        'admin_id' => $admin['id'],
+                        'admin_name' => $admin['name'],
                         'redirect' => 'admin-dashboard.html'
                     ]);
                 } else {
