@@ -31,36 +31,34 @@ try {
         exit;
     }
 
-    // Optional fields
+    // Optional fields yang mungkin ada atau tidak di database
     $position_type = trim($data['position_type'] ?? 'Full-time');
-    $department = trim($data['department'] ?? '');
     $location = trim($data['location'] ?? '');
-    $salary_range = trim($data['salary_range'] ?? '');
-    $education = trim($data['education'] ?? '');
-    $major = trim($data['major'] ?? '');
-    $min_ipk = !empty($data['min_ipk']) ? floatval($data['min_ipk']) : 0.00;
-    $quota = !empty($data['quota']) ? intval($data['quota']) : 0;
-    $deadline = !empty($data['deadline']) ? $data['deadline'] : null;
+    $salary_min = !empty($data['salary_min']) ? intval($data['salary_min']) : 0;
+    $salary_max = !empty($data['salary_max']) ? intval($data['salary_max']) : 0;
 
-    // Query with all fields from database schema
-    $query = "INSERT INTO job_postings (
-                company_id, 
-                title, 
-                description, 
-                position_type, 
-                department,
-                location, 
-                salary_range, 
-                education, 
-                major,
-                requirements, 
-                min_ipk, 
-                quota,
-                deadline, 
-                status, 
-                created_at
-              ) 
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())";
+    // Build dynamic query - hanya include kolom yang benar-benar ada
+    $columns = ['company_id', 'title', 'description', 'requirements', 'position_type', 'location', 'status'];
+    $values_placeholder = ['?', '?', '?', '?', '?', '?', "'pending'"];
+    $bind_params = 'issssss';
+    $bind_values = [&$company_id, &$title, &$description, &$requirements, &$position_type, &$location];
+
+    // Tambahkan salary jika ada
+    if ($salary_min > 0 || $salary_max > 0) {
+        $columns[] = 'salary_min';
+        $columns[] = 'salary_max';
+        $values_placeholder[] = '?';
+        $values_placeholder[] = '?';
+        $bind_params .= 'ii';
+        $bind_values[] = &$salary_min;
+        $bind_values[] = &$salary_max;
+    }
+
+    $columns_str = implode(', ', $columns);
+    $values_str = implode(', ', $values_placeholder);
+
+    $query = "INSERT INTO job_postings ($columns_str, created_at) 
+              VALUES ($values_str, NOW())";
     
     $stmt = $conn->prepare($query);
     
@@ -70,25 +68,8 @@ try {
         exit;
     }
 
-    // Bind parameters: i=integer, s=string, d=double
-    // Order: company_id(i), title(s), description(s), position_type(s), department(s), 
-    //        location(s), salary_range(s), education(s), major(s), requirements(s), 
-    //        min_ipk(d), quota(i), deadline(s)
-    $stmt->bind_param('issssssssssdis',
-        $company_id,
-        $title,
-        $description,
-        $position_type,
-        $department,
-        $location,
-        $salary_range,
-        $education,
-        $major,
-        $requirements,
-        $min_ipk,
-        $quota,
-        $deadline
-    );
+    // Bind parameters dynamically
+    call_user_func_array([$stmt, 'bind_param'], array_merge([$bind_params], $bind_values));
 
     if ($stmt->execute()) {
         $lowongan_id = $stmt->insert_id;
