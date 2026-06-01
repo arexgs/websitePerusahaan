@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS companies (
     industry VARCHAR(100),
     description TEXT,
     logo_url VARCHAR(255),
+    website VARCHAR(255),
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
     is_verified BOOLEAN DEFAULT FALSE,
     reset_token VARCHAR(64),
     reset_token_expiry DATETIME,
@@ -40,12 +43,20 @@ CREATE TABLE IF NOT EXISTS job_postings (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     position_type VARCHAR(50),
-    salary_min INT,
-    salary_max INT,
+    department VARCHAR(100),
     location VARCHAR(255),
+    salary_range VARCHAR(50),
+    education VARCHAR(100),
+    major VARCHAR(100),
     requirements TEXT,
-    status ENUM('active', 'inactive', 'closed') DEFAULT 'active',
+    min_ipk DECIMAL(3,2),
+    quota INT,
+    deadline DATE,
+    status ENUM('active', 'pending', 'closed') DEFAULT 'pending',
     applicants_count INT DEFAULT 0,
+    icon VARCHAR(50),
+    icon_bg VARCHAR(20),
+    icon_color VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
@@ -58,25 +69,30 @@ CREATE TABLE IF NOT EXISTS applicants (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
-    resume_url VARCHAR(255),
+    major VARCHAR(100),
+    year INT,
+    ipk DECIMAL(3,2),
     cover_letter TEXT,
+    skills TEXT,
+    documents TEXT,
+    avatar_bg VARCHAR(20),
+    avatar_color VARCHAR(20),
     status ENUM('pending', 'review', 'accepted', 'rejected') DEFAULT 'pending',
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (job_posting_id) REFERENCES job_postings(id) ON DELETE CASCADE
 );
 
--- Table: applicant_details
-CREATE TABLE IF NOT EXISTS applicant_details (
+-- Table: company_documents (Dokumen Perusahaan)
+CREATE TABLE IF NOT EXISTS company_documents (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    applicant_id INT NOT NULL,
-    education VARCHAR(255),
-    experience INT,
-    skills TEXT,
-    portfolio_url VARCHAR(255),
-    linkedin_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (applicant_id) REFERENCES applicants(id) ON DELETE CASCADE
+    company_id INT NOT NULL,
+    document_name VARCHAR(255) NOT NULL,
+    document_type ENUM('mou', 'proposal', 'agreement', 'other') DEFAULT 'other',
+    file_path VARCHAR(500),
+    file_size INT,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
 );
 
 -- Create indexes for better performance
@@ -85,6 +101,6 @@ CREATE INDEX idx_admin_email ON admins(email);
 CREATE INDEX idx_job_company ON job_postings(company_id);
 CREATE INDEX idx_applicant_job ON applicants(job_posting_id);
 CREATE INDEX idx_applicant_status ON applicants(status);
-CREATE INDEX idx_applicant_detail ON applicant_details(applicant_id);
 CREATE INDEX idx_company_reset_token ON companies(reset_token);
 CREATE INDEX idx_admin_reset_token ON admins(reset_token);
+CREATE INDEX idx_company_documents ON company_documents(company_id);
