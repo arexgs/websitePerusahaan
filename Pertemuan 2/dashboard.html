@@ -542,9 +542,6 @@
   <a class="nav-link-item" onclick="showPage('profil', this)">
     <i class="bi bi-person-circle"></i> Profil Perusahaan
   </a>
-  <a class="nav-link-item" onclick="showPage('dokumen', this)">
-    <i class="bi bi-file-earmark-text"></i> Dokumen
-  </a>
   <a class="nav-link-item" onclick="showPage('pengaturan', this)">
     <i class="bi bi-gear"></i> Pengaturan Akun
   </a>
@@ -580,7 +577,6 @@
         <div class="notif-header">Notifikasi</div>
         <div id="notif-list"></div>
       </div>
-      <div class="icon-btn"><i class="bi bi-envelope"></i></div>
       <div class="avatar-btn" id="topbarAvatar">--</div>
     </div>
   </header>
@@ -870,47 +866,61 @@
           <div class="card-head"><h6>Informasi Dasar</h6></div>
           <div class="row g-3">
             <div class="col-md-6">
+              <select class="form-select" name="position_type" required>
               <label class="form-label">Judul Posisi <span style="color:#DC2626">*</span></label>
               <input type="text" class="form-control" name="title" placeholder="cth. Staff Keuangan Senior" required>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Departemen</label>
-              <select class="form-select" name="department">
-                <option>-- Pilih Departemen --</option>
-                <option>Engineering & IT</option>
-                <option>Keuangan & Akuntansi</option>
-                <option>Human Resources</option>
-                <option>Marketing & Sales</option>
-                <option>Operasional</option>
-                <option>Administrasi</option>
-              </select>
-            </div>
             <div class="col-md-4">
               <label class="form-label">Tipe Pekerjaan</label>
-              <select class="form-select" name="position_type" required>
-                <option>Full-time</option><option>Part-time</option><option>Magang</option><option>Freelance</option><option>Kontrak</option>
+                <option>Onsite</option>
+                <option>Hybrid</option>
+                <option>Remote</option>
               </select>
             </div>
             <div class="col-md-4">
-              <label class="form-label">Lokasi</label>
-              <select class="form-select" name="location" required>
-                <option>Jakarta</option><option>Bandung</option><option>Surabaya</option><option>Yogyakarta</option><option>Medan</option><option>Remote</option><option>Hybrid</option>
-              </select>
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Rentang Gaji (jt/bln)</label>
-              <input type="text" class="form-control" name="salary_range" placeholder="cth. 8 – 12">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Pendidikan Minimum</label>
-              <select class="form-select" name="education">
-                <option>SMA / SMK sederajat</option><option>D3 (Diploma)</option><option>S1 (Sarjana)</option><option>S2 (Magister)</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Jurusan yang Diutamakan</label>
-              <input type="text" class="form-control" name="major" placeholder="cth. Akuntansi, Manajemen, atau semua jurusan">
-            </div>
+            <label class="form-label">Lokasi</label>
+            <select class="form-select" name="location" required>
+              <option value="">Pilih Provinsi</option>
+              <option>Aceh</option>
+              <option>Sumatera Utara</option>
+              <option>Sumatera Barat</option>
+              <option>Riau</option>
+              <option>Kepulauan Riau</option>
+              <option>Jambi</option>
+              <option>Sumatera Selatan</option>
+              <option>Kepulauan Bangka Belitung</option>
+              <option>Bengkulu</option>
+              <option>Lampung</option>
+              <option>DKI Jakarta</option>
+              <option>Jawa Barat</option>
+              <option>Jawa Tengah</option>
+              <option>DI Yogyakarta</option>
+              <option>Jawa Timur</option>
+              <option>Banten</option>
+              <option>Bali</option>
+              <option>Nusa Tenggara Barat</option>
+              <option>Nusa Tenggara Timur</option>
+              <option>Kalimantan Barat</option>
+              <option>Kalimantan Tengah</option>
+              <option>Kalimantan Selatan</option>
+              <option>Kalimantan Timur</option>
+              <option>Kalimantan Utara</option>
+              <option>Sulawesi Utara</option>
+              <option>Gorontalo</option>
+              <option>Sulawesi Tengah</option>
+              <option>Sulawesi Barat</option>
+              <option>Sulawesi Selatan</option>
+              <option>Sulawesi Tenggara</option>
+              <option>Maluku</option>
+              <option>Maluku Utara</option>
+              <option>Papua</option>
+              <option>Papua Barat</option>
+              <option>Papua Selatan</option>
+              <option>Papua Tengah</option>
+              <option>Papua Pegunungan</option>
+              <option>Papua Barat Daya</option>
+            </select>
+          </div>
             <div class="col-12">
               <label class="form-label">Deskripsi Pekerjaan <span style="color:#DC2626">*</span></label>
               <textarea class="form-control" name="description" rows="4" placeholder="Jelaskan tanggung jawab dan tugas utama posisi ini..." required></textarea>
@@ -919,17 +929,13 @@
               <label class="form-label">Kualifikasi <span style="color:#DC2626">*</span></label>
               <textarea class="form-control" name="requirements" rows="4" placeholder="Persyaratan pendidikan, keahlian, dan pengalaman yang dibutuhkan..." required></textarea>
             </div>
+            <div class="col-12">
+              <label class="form-label">Benefit <span style="color:#DC2626">*</span></label>
+              <textarea class="form-control" name="requirements" rows="4" placeholder="Benefit yang akan didapatkan..." required></textarea>
+            </div>
             <div class="col-md-4">
               <label class="form-label">Batas Lamaran</label>
               <input type="date" class="form-control" name="deadline">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Kuota Penerimaan</label>
-              <input type="number" class="form-control" name="quota" placeholder="cth. 3">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Minimum IPK</label>
-              <input type="text" class="form-control" name="min_ipk" placeholder="cth. 3.00">
             </div>
           </div>
         </div>
@@ -956,53 +962,6 @@
       </div>
     </div>
 
-    <!-- ═══════════════ DOKUMEN ═══════════════ -->
-    <div class="page" id="page-dokumen">
-      <div class="pg-header">
-        <div>
-          <h4>Manajemen Dokumen</h4>
-          <p>Kelola dokumen kerjasama dan dokumen pendukung perusahaan</p>
-        </div>
-        <button class="btn-brand" onclick="openDocumentModal()"><i class="bi bi-plus-lg"></i> Upload Dokumen</button>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-md-8">
-          <div class="ui-card">
-            <div class="card-head"><h6>Dokumen Perusahaan</h6></div>
-            
-            <div id="company-documents">
-              <div class="empty-state" style="border:none;background:none;padding:40px 30px">
-                <i class="bi bi-file-earmark"></i>
-                <h5>Belum ada dokumen</h5>
-                <p>Upload dokumen MoU, Proposal, atau Surat Kerjasama</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="ui-card">
-            <div class="card-head"><h6><i class="bi bi-info-circle me-2"></i>Jenis Dokumen</h6></div>
-            <div style="font-size:12px;color:var(--muted);line-height:1.8">
-              <div style="margin-bottom:12px">
-                <strong style="color:var(--text)">MoU (Memorandum of Understanding)</strong><br>
-                Kesepakatan awal kerjasama
-              </div>
-              <div style="margin-bottom:12px">
-                <strong style="color:var(--text)">Proposal Kerja Sama</strong><br>
-                Rencana program atau proyek
-              </div>
-              <div>
-                <strong style="color:var(--text)">Surat Kerjasama</strong><br>
-                Dokumen resmi kerjasama perusahaan
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- ═══════════════ PROFIL ═══════════════ -->
     <div class="page" id="page-profil">
       <div class="pg-header">
@@ -1015,7 +974,6 @@
       <!-- Profile Tabs -->
       <ul class="nav nav-tabs mb-3" style="gap:0">
         <li class="nav-item"><a class="prof-tab nav-link active" style="border-bottom:3px solid var(--brand);color:var(--brand);cursor:pointer" onclick="switchProfTab('info',this)">Informasi Dasar</a></li>
-        <li class="nav-item"><a class="prof-tab nav-link" style="border-bottom:3px solid transparent;color:var(--muted);cursor:pointer" onclick="switchProfTab('lokasi',this)">Lokasi Kantor</a></li>
       </ul>
 
       <!-- Tab: Informasi Dasar -->
@@ -1051,24 +1009,12 @@
         </div>
       </div>
 
-      <!-- Tab: Lokasi Kantor (Map) -->
-      <div class="prof-tab-content" id="tab-lokasi" style="display:none;">
-        <div class="ui-card">
-          <div class="card-head"><h6><i class="bi bi-geo-alt me-2" style="color:var(--brand)"></i>Peta Lokasi Kantor</h6></div>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Klik pada peta untuk menentukan lokasi kantor Anda</p>
-          <div id="company-map"></div>
-          <small style="color:var(--muted);display:block;margin-top:12px">
-            <i class="bi bi-info-circle"></i> Lokasi akan membantu mahasiswa mengetahui letak kantor perusahaan Anda.
-          </small>
-        </div>
-      </div>
-
       <div class="d-flex justify-content-end gap-2 mt-3">
         <button class="btn-brand" onclick="handleSaveProfile()"><i class="bi bi-check-lg"></i> Simpan Profil</button>
       </div>
     </div>
 
-    <!-- ═══════════════ PENGATURAN ═══════════════ -->
+          <!-- ═══════════════ PENGATURAN ═══════════════ -->
     <div class="page" id="page-pengaturan">
       <div class="pg-header">
         <div>
@@ -1117,70 +1063,135 @@
                 <label class="form-label">Password Saat Ini</label>
                 <div class="input-group mb-2">
                   <input type="password" class="form-control" id="set-current-pass" placeholder="Masukkan password lama">
-                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-current-pass')"><i class="bi bi-eye"></i></button>
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-current-pass')">
+                    <i class="bi bi-eye"></i>
+                  </button>
                 </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label"></label>
-              </div>
+              <div class="col-md-6"></div>
               <div class="col-md-6">
                 <label class="form-label">Password Baru</label>
                 <div class="input-group mb-2">
-                  <input type="password" class="form-control" id="set-new-pass" placeholder="Biarkan kosong jika tidak ingin mengubah">
-                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-new-pass')"><i class="bi bi-eye"></i></button>
+                  <input type="password" class="form-control" id="set-new-pass" placeholder="Minimal 8 karakter">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-new-pass')">
+                    <i class="bi bi-eye"></i>
+                  </button>
                 </div>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Konfirmasi Password Baru</label>
                 <div class="input-group mb-2">
-                  <input type="password" class="form-control" id="set-confirm-pass" placeholder="Konfirmasi password baru">
-                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-confirm-pass')"><i class="bi bi-eye"></i></button>
+                  <input type="password" class="form-control" id="set-confirm-pass" placeholder="Ulangi password baru">
+                  <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('set-confirm-pass')">
+                    <i class="bi bi-eye"></i>
+                  </button>
                 </div>
               </div>
-              <div class="col-12">
-                <small style="color:var(--muted)">
-                  <i class="bi bi-info-circle"></i> Password minimal 6 karakter. Gunakan kombinasi huruf, angka, dan simbol untuk keamanan lebih baik.
-                </small>
+            </div>
+            <small style="color:var(--muted);display:block;margin-top:12px">
+              <i class="bi bi-info-circle"></i> Password harus minimal 8 karakter, kombinasi huruf besar, kecil, angka, dan simbol.
+            </small>
+          </div>
+
+          <!-- Notifications -->
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-bell me-2" style="color:#D97706"></i>Preferensi Notifikasi</h6></div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
+                <div>
+                  <div style="font-size:13px;font-weight:500">Pelamar Baru</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Notifikasi ketika ada mahasiswa melamar posisi</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
+                <div>
+                  <div style="font-size:13px;font-weight:500">Status Lowongan Diperbarui</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Notifikasi saat lowongan disetujui atau ditolak admin</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
+                <div>
+                  <div style="font-size:13px;font-weight:500">Pengingat Batas Lamaran</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Ingatkan 3 hari sebelum lowongan ditutup</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:1px solid var(--border)">
+                <div>
+                  <div style="font-size:13px;font-weight:500">Laporan Mingguan</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Ringkasan performa lowongan setiap Senin</div>
+                </div>
+                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-size:13px;font-weight:500">Update Fitur & Promo</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Info tentang fitur baru dan penawaran menarik</div>
+                </div>
+                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
               </div>
             </div>
           </div>
 
-          <!-- Two-Factor Auth -->
+          <!-- Privacy & Data -->
           <div class="ui-card">
-            <div class="card-head"><h6><i class="bi bi-shield-check me-2" style="color:#16A34A"></i>Keamanan Dua Faktor</h6></div>
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <p style="margin:0;font-weight:600">Aktifkan Autentikasi Dua Faktor</p>
-                <small style="color:var(--muted)">Tambah lapisan keamanan ekstra untuk akun Anda</small>
+            <div class="card-head"><h6><i class="bi bi-shield-check me-2" style="color:#16A34A"></i>Privasi & Data</h6></div>
+            <div style="display:flex;flex-direction:column;gap:14px;font-size:12px">
+              <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
+                <div style="font-weight:600;margin-bottom:4px"><i class="bi bi-check-circle me-2" style="color:var(--success)"></i>Data Perusahaan Tersimpan Aman</div>
+                <div style="color:var(--muted)">Informasi perusahaan Anda dienkripsi dan disimpan dengan standar keamanan internasional.</div>
               </div>
-              <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
+              <div style="padding:12px;background:var(--surface2);border-radius:var(--radius-sm)">
+                <div style="font-weight:600;margin-bottom:4px"><i class="bi bi-file-earmark-text me-2" style="color:var(--brand)"></i>Kebijakan Privasi</div>
+                <div style="color:var(--muted)">Baca <a href="#" style="color:var(--brand);text-decoration:none">kebijakan privasi kami</a> untuk informasi lengkap tentang bagaimana kami mengelola data Anda.</div>
+              </div>
             </div>
           </div>
         </div>
 
+        <!-- Sidebar -->
         <div class="col-lg-3">
-          <div class="ui-card">
-            <div class="card-head"><h6><i class="bi bi-info-circle me-2" style="color:#D97706"></i>Info Akun</h6></div>
-            <div style="font-size:13px;line-height:1.8">
-              <div style="margin-bottom:12px">
-                <strong style="color:var(--text);display:block;margin-bottom:3px">Status Verifikasi</strong>
-                <span class="pill" style="background:#FEE2E2;color:#DC2626"><i class="bi bi-x-circle" style="font-size:9px"></i> Belum Verifikasi</span>
+          <!-- Activity Log -->
+          <div class="ui-card mb-3">
+            <div class="card-head"><h6><i class="bi bi-clock-history me-2"></i>Aktivitas Terakhir</h6></div>
+            <div style="font-size:12px;color:var(--muted)">
+              <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+                <div style="font-weight:500;color:var(--text)">Login</div>
+                <div style="font-size:11px;margin-top:2px">Hari ini, 09:30</div>
               </div>
-              <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
-              <div style="margin-bottom:12px">
-                <strong style="color:var(--text);display:block;margin-bottom:3px">Akun Dibuat</strong>
-                <span style="color:var(--muted)">Baru saja</span>
+              <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+                <div style="font-weight:500;color:var(--text)">Membuat lowongan</div>
+                <div style="font-size:11px;margin-top:2px">Kemarin, 14:20</div>
               </div>
-              <div>
-                <strong style="color:var(--text);display:block;margin-bottom:3px">Login Terakhir</strong>
-                <span style="color:var(--muted)">Baru saja</span>
+              <div style="padding:8px 0;border-bottom:1px solid var(--border)">
+                <div style="font-weight:500;color:var(--text)">Update profil</div>
+                <div style="font-size:11px;margin-top:2px">2 hari lalu</div>
               </div>
+              <div style="padding:8px 0">
+                <div style="font-weight:500;color:var(--text)">Ubah password</div>
+                <div style="font-size:11px;margin-top:2px">5 hari lalu</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="ui-card" style="border-color:#FECACA">
+            <div class="card-head"><h6><i class="bi bi-exclamation-triangle-fill me-2" style="color:#DC2626"></i>Zona Berbahaya</h6></div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Tindakan berikut bersifat permanen dan tidak dapat dibatalkan.</p>
+            <div class="d-flex flex-column gap-2">
+              <button class="btn-danger-soft w-100" onclick="showToast('⚠ Fitur ini memerlukan konfirmasi lebih lanjut.')">
+                <i class="bi bi-trash3"></i> Hapus Semua Data Lowongan
+              </button>
+              <button class="btn-danger-soft w-100" onclick="showToast('⚠ Hubungi admin untuk menonaktifkan akun')">
+                <i class="bi bi-x-octagon"></i> Nonaktifkan Akun
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-
   </main>
 </div>
 
