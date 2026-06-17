@@ -153,30 +153,24 @@
                         </div>
                         
                         <div class="position-relative ps-2">
-                            <div class="mb-3 border-start border-2 ps-3 pb-2 position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle bg-primary p-1 rounded-circle style-dot" style="margin-left: -1px;"></span>
-                                <div class="fw-bold text-dark small">Melakukan Login Sistem</div>
-                                <small class="text-muted d-block">Hari ini, 12:58 WIB</small>
-                            </div>
-                            <div class="mb-3 border-start border-2 ps-3 pb-2 position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle bg-secondary p-1 rounded-circle style-dot" style="margin-left: -1px;"></span>
-                                <div class="fw-bold text-dark small">Verifikasi Dokumen PT. Solusi IT</div>
-                                <small class="text-muted d-block">Kemarin, 14:20 WIB</small>
-                            </div>
-                            <div class="mb-3 border-start border-2 ps-3 pb-2 position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle bg-secondary p-1 rounded-circle style-dot" style="margin-left: -1px;"></span>
-                                <div class="fw-bold text-dark small">Menolak Validasi Team "Error 404"</div>
-                                <small class="text-muted d-block">2 hari lalu</small>
-                            </div>
-                            <div class="border-start border-2 ps-3 pb-1 position-relative">
-                                <span class="position-absolute top-0 start-0 translate-middle bg-secondary p-1 rounded-circle style-dot" style="margin-left: -1px;"></span>
-                                <div class="fw-bold text-dark small">Mengubah Konfigurasi Sistem</div>
-                                <small class="text-muted d-block">5 hari lalu</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card p-4 border border-danger-subtle bg-danger-subtle bg-opacity-10 rounded-4 shadow-sm">
+                            @if(isset($adminLogs) && count($adminLogs) > 0)
+                                @foreach($adminLogs as $log)
+                                    <div class="mb-3 border-start border-2 ps-3 pb-2 position-relative">
+                                        <span class="position-absolute top-0 start-0 translate-middle p-1 rounded-circle style-dot {{ $loop->first ? 'bg-primary' : 'bg-secondary' }}" style="margin-left: -1px;"></span>
+                                        
+                                        <div class="fw-bold text-dark small">{{ $log->activity_description }}</div>
+                                        
+                                        <small class="text-muted d-block">
+                                            {{ \Carbon\Carbon::parse($log->created_at)->locale('id')->diffForHumans() }}
+                                        </small>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-muted small py-2 ps-2">
+                                    <i class="bi bi-info-circle me-1"></i> Belum ada riwayat aktivitas tercatat.
+                                </div>
+                            @endif
+                        </div>              <div class="card p-4 border border-danger-subtle bg-danger-subtle bg-opacity-10 rounded-4 shadow-sm">
                         <div class="d-flex align-items-center gap-2 mb-2 text-danger">
                             <i class="bi bi-exclamation-triangle-fill"></i>
                             <h6 class="fw-bold mb-0">Zona Berbahaya</h6>
@@ -186,9 +180,6 @@
                         <div class="d-flex flex-column gap-2">
                             <button type="button" class="btn btn-danger btn-sm py-2 rounded-3 fw-semibold text-white d-flex align-items-center justify-content-center gap-2" onclick="return confirm('Apakah Anda yakin ingin mengosongkan seluruh log antrean dokumen?')">
                                 <i class="bi bi-trash3"></i> Kosongkan Riwayat Log Validasi
-                            </button>
-                            <button type="button" class="btn btn-outline-danger btn-sm py-2 rounded-3 fw-semibold d-flex align-items-center justify-content-center gap-2" onclick="return confirm('Apakah Anda yakin ingin menangguhkan pendaftaran perusahaan baru?')">
-                                <i class="bi bi-slash-circle"></i> Tangguhkan Registrasi Perusahaan
                             </button>
                         </div>
                     </div>

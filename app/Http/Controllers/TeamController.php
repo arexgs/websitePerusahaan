@@ -74,4 +74,23 @@ class TeamController extends Controller
             'internThisMonth'
         ));
     }
+
+    public function getDetailTeam($id)
+    {
+        // Cari team beserta relasi creator (student)
+        $team = Team::with('creator')->find($id);
+
+        if (!$team) {
+            return response()->json(['error' => 'Kelompok tidak ditemukan.'], 404);
+        }
+
+        // Hitung total anggota yang tergabung saat ini (sesuaikan dengan logika DB Anda)
+        // Misal jika ada tabel pivot atau kolom counter:
+        $totalAnggota = $team->members()->count(); // atau sesuai relasi kelompok Anda
+
+        return response()->json([
+            'team' => $team,
+            'total_anggota' => $totalAnggota
+        ]);
+    }
 }

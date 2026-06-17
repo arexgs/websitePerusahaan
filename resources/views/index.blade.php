@@ -124,38 +124,38 @@ if (!function_exists('formatTanggalIndo')) {
                         </tr>
                     </thead>
                     <tbody>
-                        @if (count($daftarDokumen) > 0)
-                            @foreach ($daftarDokumen as $dokumen)
-                                <tr class="border-bottom">
-                                    <td class="py-3">
-                                        <div class="d-flex align-items-center">
-                                            <div class="text-white p-2 me-3" style="width: 40px; text-align: center; background-color: #1FABE1; border-radius: 10px; font-weight: 600;">
-                                                {{ strtoupper(substr($dokumen->company_name, 0, 1)) }}
-                                            </div>
-                                            <span class="fw-bold">{{ $dokumen->company_name }}</span>
-                                        </div>
-                                    </td>
-                                    <td>{{ $dokumen->internship_title }}</td>
-                                    <td>{{ formatTanggalIndo($dokumen->apply_date) }}</td>
-                                    <td>
-                                        @php
-                                        $statusLower = strtolower($dokumen->status);
-                                        $badgeClass = ($statusLower == 'pending') ? 'badge-pending' : (($statusLower == 'accepted') ? 'badge bg-success-subtle text-success' : 'badge bg-danger-subtle text-danger');
-                                        @endphp
-                                        <span class="{{ $badgeClass }}">{{ ucfirst($dokumen->status) }}</span>
-                                    </td>
-                                    <td>
-                                        <button class="button-kustom btn-sm" data-bs-toggle="modal" data-bs-target="#modalVerifikasi">Verifikasi</button>
-                                        <button class="btn btn-light btn-sm btn-action text-danger"><i class="bi bi-trash"></i></button>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        @else
-                            <tr>
-                                <td colspan="5" class="text-center py-4 text-muted">Tidak ada data pengajuan magang baru.</td>
-                            </tr>
-                        @endif
-                    </tbody>
+    @if (count($daftarDokumen) > 0)
+        @foreach ($daftarDokumen as $dokumen)
+            <tr class="border-bottom">
+                <td class="py-3">
+                    <div class="d-flex align-items-center">
+                        <div class="text-white p-2 me-3" style="width: 40px; text-align: center; background-color: #1FABE1; border-radius: 10px; font-weight: 600;">
+                            {{ strtoupper(substr($dokumen->company_name, 0, 1)) }}
+                        </div>
+                        <span class="fw-bold">{{ $dokumen->company_name }}</span>
+                    </div>
+                </td>
+                <td>{{ $dokumen->internship_title }}</td>
+                
+                <td>{{ formatTanggalIndo($dokumen->apply_date) }}</td>
+                
+                <td>
+                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded">Pending</span>
+                </td>
+                <td>
+                    <a href="{{ url('/validasi-magang') }}" class="button-kustom btn-sm text-decoration-none d-inline-block text-center pt-1" style="height: 32px;">Verifikasi</a>
+                </td>
+            </tr>
+        @endforeach
+    @else
+        <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+                <i class="bi bi-check-circle text-success d-block mb-2" style="font-size: 2rem;"></i>
+                Semua dokumen lowongan baru telah divalidasi. Tidak ada data pending!
+            </td>
+        </tr>
+    @endif
+</tbody>
                 </table>
             </div>
         </div>

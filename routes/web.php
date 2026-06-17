@@ -20,6 +20,13 @@ Route::get('/daftar-perusahaan/hapus/{id}', [CompanyController::class, 'destroy'
 Route::get('/daftar-team', [TeamController::class, 'index']);
 
 // Rute untuk menampilkan halaman pengaturan
-Route::get('/pengaturan', function () {
-    return view('pengaturan');
-});
+Route::get('/pengaturan', function () {return view('pengaturan');});
+
+Route::get('/api/perusahaan/{id}', [CompanyController::class, 'getDetailJson']);
+
+Route::get('/team/{id}', [TeamController::class, 'getDetailTeam']);
+
+use App\Http\Controllers\PengaturanController;
+
+Route::get('/pengaturan', [PengaturanController::class, 'index'])->middleware('auth');
+Route::put('/pengaturan/simpan', [PengaturanController::class, 'simpan'])->middleware('auth');

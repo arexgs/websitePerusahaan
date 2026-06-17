@@ -117,4 +117,24 @@ class companyController extends Controller
             return redirect('/daftar-perusahaan')->with('error', 'Gagal menghapus data perusahaan.');
         }
     }
+
+    public function getDetailJson($id)
+{
+    // Mengambil profil perusahaan beserta daftar lowongan kerja yang dimilikinya
+    $perusahaan = \DB::table('companies')->where('id_company', $id)->first();
+    
+    if (!$perusahaan) {
+        return response()->json(['error' => 'Data tidak ditemukan'], 404);
+    }
+
+    $lowongan = \DB::table('internships')
+        ->where('id_company', $id)
+        ->orderBy('id_internship', 'desc')
+        ->get();
+
+    return response()->json([
+        'company' => $perusahaan,
+        'internships' => $lowongan
+    ]);
+}
 }

@@ -9,29 +9,33 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        //buat menghitung data statistik untuk card bagian atas
+        // 1. Menghitung data statistik untuk card bagian atas
         $totalCompany = DB::table('companies')->count();
-        $totalTeam = 0; 
-        $totalPending = DB::table('applications')->where('application_status', 'pending')->count();
+        $totalTeam = 0; // Silakan sesuaikan jika nanti ada tabel teams
+        
+        // DISAMAKAN: Menghitung lowongan dari mitra yang butuh validasi (hasilnya akan jadi 2)
+        $totalPending = DB::table('internships')->where('approval_status', 'pending')->count();
 
-        //buat menagambil data pengajuan magang baru
-        $daftarDokumen = DB::table('applications')
-            ->join('internships', 'applications.id_internship', '=', 'internships.id_internship')
-            ->join('companies', 'internships.id_company', '=', 'companies.id_company')
+        // 2. Mengambil data lowongan baru yang berstatus PENDING untuk ringkasan Dashboard
+        // Menggunakan tabel internships dan companies, disamakan dengan halaman validasi
+        $daftarDokumen = DB::table('internships as i')
+            ->join('companies as c', 'i.id_company', '=', 'c.id_company')
             ->select(
-                'companies.company_name',
-                'internships.title as internship_title',
-                DB::raw("'2026-06-12' as apply_date"), 
-                'applications.application_status as status'
+                'i.id_internship',
+                'c.company_name',
+                'i.title as internship_title',
+                'i.deadline as apply_date', // Menggunakan tanggal deadline/masuk lowongan
+                'i.approval_status as status' // Kolom status disesuaikan dengan 'approval_status'
             )
+            ->where('i.approval_status', 'pending') // Hanya ambil yang pending untuk rangkuman dashboard
+            ->orderBy('i.id_internship', 'desc')
             ->get();
 
-        //buat ambil data aktivitas tim mahasiswa
+        // Buat ambil data aktivitas tim mahasiswa (sementara dikosongkan dulu sesuai kodemu)
         $daftarFeedback = [];
 
         return view('index', compact('totalCompany', 'totalTeam', 'totalPending', 'daftarDokumen', 'daftarFeedback'));
     }
-
     public function validasiMagang(Request $request)
     {
         $searchQuery = $request->query('search');
@@ -51,7 +55,8 @@ class DashboardController extends Controller
                 'i.approval_status',
                 'i.supporting_document',
                 'i.location',
-                'c.industry_field'
+                'c.industry_field',
+                'c.company_logo'
             );
 
         if (!empty($searchQuery)) {
