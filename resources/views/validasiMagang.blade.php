@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNSCollab - Validasi Dokumen Mitra</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('style.css') }}" />      
 </head>
 <body>
@@ -125,8 +125,9 @@
                         @if (count($daftarLowongan) > 0)
                             @foreach ($daftarLowongan as $row)
                                 @php 
-                                    $fileName = $row->supporting_document ? $row->supporting_document : 'MOU_Mitra_Undef.pdf';
-                                    $fileLink = asset('uploads/' . $fileName);
+                                    $fileName = $row->supporting_document ? basename($row->supporting_document) : 'MOU_Mitra_Undef.pdf';
+                                    // Gunakan URL Supabase yang sudah di-generate controller, fallback ke asset lokal
+                                    $fileLink = $row->file_url ?? asset('uploads/' . $fileName);
                                 @endphp
                                 <tr class="border-bottom">
                                     <td class="py-3">
@@ -236,7 +237,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         const modalVerifikasi = document.getElementById('modalVerifikasi');
         if (modalVerifikasi) {

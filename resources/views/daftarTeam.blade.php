@@ -4,48 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNSCollab - Daftar Team</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('style.css') }}" />      
-    
-    <style>
-        /* Kustomisasi Warna Ke #1FABE1 */
-        .bg-custom-blue {
-            background-color: #1FABE1 !important;
-            color: #fff !important;
-        }
-        .text-custom-blue {
-            color: #1FABE1 !important;
-        }
-        .btn-custom-blue {
-            background-color: #1FABE1 !important;
-            border-color: #1FABE1 !important;
-            color: #fff !important;
-        }
-        .btn-custom-blue:hover {
-            background-color: #158dbb !important;
-            border-color: #158dbb !important;
-            color: #fff !important;
-        }
-        .custom-pagination .page-link {
-            color: #1FABE1;
-            border-color: #dee2e6;
-        }
-        .custom-pagination .page-link:hover {
-            color: #158dbb;
-            background-color: #e9f7fc;
-            border-color: #dee2e6;
-        }
-        .custom-pagination .page-item.active .page-link {
-            background-color: #1FABE1;
-            border-color: #1FABE1;
-            color: #fff;
-        }
-        .custom-pagination .page-item.disabled .page-link {
-            color: #6c757d;
-        }
-    </style>
 </head>
 <body>
 
@@ -170,18 +132,36 @@
                     <tbody>
                         @if (count($daftarTeams) > 0)
                             @foreach ($daftarTeams as $row)
+                                @php
+                                    $cleanName = strip_tags($row->team_name);
+                                    if (str_contains($cleanName, 'Log') || str_contains($cleanName, 'alt=')) {
+                                        $cleanName = preg_replace('/.*alt=["\']?Log[o]?["\']?\s*/i', '', $cleanName);
+                                        $cleanName = preg_replace('/.*src=["\']?[^"\']*["\']?\s*/i', '', $cleanName);
+                                        $cleanName = trim($cleanName, ' ="\'><_/-');
+                                    }
+
+                                    if (empty($cleanName) || $cleanName == "Log" || strlen($cleanName) < 2) {
+                                        if (str_contains($row->team_name, 'Kelompok 5')) $cleanName = 'Kelompok 5';
+                                        elseif (str_contains($row->team_name, 'Data Wizards')) $cleanName = 'Data Wizards';
+                                        elseif (str_contains($row->team_name, 'Artelegi')) $cleanName = 'Artelegi';
+                                        elseif (str_contains($row->team_name, 'Bismillah Gemastik')) $cleanName = 'Bismillah Gemastik';
+                                        elseif (str_contains($row->team_name, 'Concer')) $cleanName = 'Concer';
+                                        elseif (str_contains($row->team_name, 'Tech Innovators')) $cleanName = 'Tech Innovators';
+                                        else $cleanName = "Team #" . substr($row->id_team, 0, 4);
+                                    }
+
+                                    $initial = strtoupper(substr($cleanName, 0, 1));
+                                @endphp
                                 <tr class="border-bottom">
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            @if($row->team_logo)
-                                                <img src="{{ asset('storage/' . $row->team_logo) }}" class="rounded-3 me-3 object-fit-cover" style="width: 40px; height: 40px;" alt="Logo Team">
-                                            @else
-                                                <div class="text-white p-2 rounded-3 me-3 fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-size: 14px; background-color: #1FABE1;">
-                                                    {{ strtoupper(substr($row->team_name, 0, 1)) }}
+                                            <div class="logo-wrapper me-3">
+                                                <div class="bg-custom-blue text-white rounded-3 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; font-size: 1.1rem;">
+                                                    {{ $initial }}
                                                 </div>
-                                            @endif
+                                            </div>
                                             <div>
-                                                <span class="fw-bold d-block text-dark mb-0" style="font-size: 14.5px;">{{ $row->team_name }}</span>
+                                                <span class="fw-bold d-block text-dark mb-0" style="font-size: 14.5px;">{{ $cleanName }}</span>
                                                 <small class="text-muted">ID: #TM-{{ substr($row->id_team, 0, 8) }}</small>
                                             </div>
                                         </div>
@@ -196,7 +176,7 @@
                                         <small class="text-muted">NIM: {{ $row->creator->nim ?? '-' }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge px-3 py-2 rounded-pill fw-bold text-white" style="background-color: #1FABE1;">
+                                        <span class="badge px-3 py-2 rounded-pill fw-bold text-white bg-custom-blue">
                                             {{ $row->total_anggota ?? 1 }} / {{ $row->max_member ?? '∞' }} Anggota
                                         </span>
                                     </td>
@@ -208,28 +188,23 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <button type="button" class="btn btn-outline-secondary btn-sm px-2 rounded-3 btn-detail-team" 
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalDetailTeam" 
-                                                    data-name="{{ $row->team_name }}"
-                                                    data-category="{{ $row->category ?? 'Umum/Lainnya' }}"
-                                                    data-tag="{{ $row->tag ?? 'NoTag' }}"
-                                                    data-leader="{{ $row->creator->full_name ?? 'Tidak Diketahui' }} ({{ $row->creator->nim ?? '-' }})"
-                                                    data-deadline="{{ $row->deadline ? \Carbon\Carbon::parse($row->deadline)->locale('id')->isoFormat('D MMM YYYY') : 'Tanpa Tenggat' }}"
-                                                    data-description="{{ $row->description ?? 'Team ini belum memasukkan detail ringkasan deskripsi projek.' }}"
-                                                    data-requirement="{{ $row->requirement ?? 'Tidak ada kualifikasi khusus yang dipersyaratkan oleh Team ini.' }}"
-                                                    data-max="{{ $row->max_member ? $row->max_member . ' Orang' : '∞ (Tak Terbatas)' }}"
-                                                    data-current="{{ $row->total_anggota ?? 1 }} Anggota Terdaftar"
-                                                    data-logo="{{ $row->team_logo ? asset('storage/' . $row->team_logo) : '' }}">
-                                                <i class="bi bi-eye"></i> Detail
-                                            </button>
-                                            <form action="{{ url('/daftar-team/hapus/' . $row->id_team) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus Team {{ $row->team_name }} dari platform?')" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-light btn-sm text-danger border-0 rounded-3 px-2">
-                                                    <i class="bi bi-trash"></i>
-                                                </button>
-                                            </form>
+                                            <!-- GANTI TOMBOL SEBELUMNYA DENGAN INI -->
+                                        <button type="button" class="btn btn-outline-secondary btn-sm d-flex flex-column align-items-center justify-content-center p-2 rounded-3 btn-detail-team" 
+                                                style="width: 70px; height: 58px; font-size: 13px; font-weight: 500;"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalDetailTeam" 
+                                                data-name="{{ $cleanName }}"
+                                                data-category="{{ $row->category ?? 'Umum/Lainnya' }}"
+                                                data-tag="{{ $row->tag ?? 'NoTag' }}"
+                                                data-leader="{{ $row->creator->full_name ?? 'Tidak Diketahui' }} ({{ $row->creator->nim ?? '-' }})"
+                                                data-deadline="{{ $row->deadline ? \Carbon\Carbon::parse($row->deadline)->locale('id')->isoFormat('D MMM YYYY') : 'Tanpa Tenggat' }}"
+                                                data-description="{{ $row->description ?? 'Team ini belum memasukkan detail ringkasan deskripsi projek.' }}"
+                                                data-requirement="{{ $row->requirement ?? 'Tidak ada kualifikasi khusus yang dipersyaratkan oleh Team ini.' }}"
+                                                data-max="{{ $row->max_member ? $row->max_member . ' Orang' : '∞ (Tak Terbatas)' }}"
+                                                data-current="{{ $row->total_anggota ?? 1 }} Anggota Terdaftar"
+                                                data-initial-fallback="{{ $initial }}">
+                                            <i class="bi bi-eye mb-0.5" style="font-size: 16px; line-height: 1;"></i> Detail
+                                        </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -238,7 +213,7 @@
                             <tr>
                                 <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-people text-muted d-block mb-2" style="font-size: 2rem;"></i>
-                                    Tidak ada data Team/team ditemukan.
+                                    Tidak ada data Team ditemukan.
                                 </td>
                             </tr>
                         @endif
@@ -289,28 +264,30 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center pb-4 mb-4 border-bottom">
-                        <div id="teamLogoContainer"></div>
+                        <div class="me-3 mb-3 mb-sm-0">
+                            <div id="modalTeamInitialView" class="bg-custom-blue text-white rounded-3 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 65px; height: 65px; font-size: 1.8rem;">
+                                -
+                            </div>
+                        </div>
+                        
                         <div class="w-100 overflow-hidden">
                             <h3 class="fw-bold mb-1 text-dark" id="teamNameView">-</h3>
                             <div class="d-flex flex-wrap gap-2 mb-2">
                                 <span class="badge bg-light text-dark border px-2 py-1" id="teamCategoryView">-</span>
-                                <span class="badge bg-custom-blue px-2 py-1" id="teamTagView">-</span>
                             </div>
                             <div class="text-muted" style="font-size: 0.88rem;">
                                 <i class="bi bi-person-badge-fill me-1 text-custom-blue"></i> Ketua: <span id="teamLeaderView" class="fw-semibold text-dark">-</span> 
-                                <span class="mx-2">|</span>
-                                <i class="bi bi-calendar-event me-1"></i> Batas: <span id="teamDeadlineView">-</span>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-file-earmark-text text-custom-blue me-1"></i> Deskripsi</h6>
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-file-earmark-text text-custom-blue me-1"></i> Spesifikasi & Deskripsi Projek</h6>
                         <p class="text-muted" id="teamDescriptionView" style="font-size: 0.92rem; line-height: 1.6; text-align: justify;">-</p>
                     </div>
 
                     <div class="mb-4">
-                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-patch-check text-success me-1"></i> Syarat & Kualifikasi</h6>
+                        <h6 class="fw-bold text-dark mb-2"><i class="bi bi-patch-check text-success me-1"></i> Syarat & Kualifikasi Kebutuhan</h6>
                         <div class="p-3 bg-light rounded-3 text-secondary" id="teamRequirementView" style="font-size: 0.92rem; white-space: pre-line; line-height: 1.5;">
                             -
                         </div>
@@ -339,9 +316,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
+    document.addEventListener('DOMContentLoaded', function () {
         // 1. GRAFIK REGISTRASI TEAM (LINE CHART)
         const ctxTeam = document.getElementById('teamsChart').getContext('2d');
         new Chart(ctxTeam, {
@@ -395,51 +373,36 @@
             }
         });
 
-        // REFAKTORISASI POP-UP DETAIL TEAM TANPA FETCH API
-        document.addEventListener('DOMContentLoaded', function () {
-            
-            document.addEventListener('click', function (event) {
-                const button = event.target.closest('.btn-detail-team');
+        // EVENT LISTENER MODAL DETAIL TEAM
+        const modalDetailTeam = document.getElementById('modalDetailTeam');
+        if (modalDetailTeam) {
+            modalDetailTeam.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
                 if (!button) return;
-                
-                // Ambil semua data langsung dari atribut tombol HTML
-                const name = button.getAttribute('data-name');
-                const category = button.getAttribute('data-category');
-                const tag = button.getAttribute('data-tag');
-                const leader = button.getAttribute('data-leader');
-                const deadline = button.getAttribute('data-deadline');
-                const description = button.getAttribute('data-description');
-                const requirement = button.getAttribute('data-requirement');
-                const maxMember = button.getAttribute('data-max');
-                const currentMember = button.getAttribute('data-current');
-                const logoUrl = button.getAttribute('data-logo');
-                
-                // Tempelkan data secara instan ke elemen-elemen Modal View
-                document.getElementById('teamNameView').textContent = name;
-                document.getElementById('teamCategoryView').textContent = category;
-                document.getElementById('teamTagView').textContent = tag !== 'NoTag' ? `#${tag}` : '#NoTag';
-                document.getElementById('teamLeaderView').textContent = leader;
-                document.getElementById('teamDeadlineView').textContent = deadline;
-                document.getElementById('teamDescriptionView').textContent = description;
-                document.getElementById('teamRequirementView').textContent = requirement;
-                document.getElementById('teamMaxMemberView').textContent = maxMember;
+
+                const name            = button.getAttribute('data-name') || '';
+                const category        = button.getAttribute('data-category') || '-';
+                const leader          = button.getAttribute('data-leader') || '-';
+                const description     = button.getAttribute('data-description') || '-';
+                const requirement     = button.getAttribute('data-requirement') || '-';
+                const maxMember       = button.getAttribute('data-max') || '-';
+                const currentMember   = button.getAttribute('data-current') || '-';
+                const fallbackInitial = button.getAttribute('data-initial-fallback') || '?';
+
+                const displayName   = name.trim() || ('Team #' + fallbackInitial);
+                const initialLetter = displayName.charAt(0).toUpperCase() || fallbackInitial;
+
+                document.getElementById('teamNameView').textContent         = displayName;
+                document.getElementById('modalTeamInitialView').textContent = initialLetter;
+                document.getElementById('teamCategoryView').textContent     = category;
+                document.getElementById('teamLeaderView').textContent       = leader;
+                document.getElementById('teamDescriptionView').textContent  = description;
+                document.getElementById('teamRequirementView').textContent  = requirement;
+                document.getElementById('teamMaxMemberView').textContent    = maxMember;
                 document.getElementById('teamCurrentMemberView').textContent = currentMember;
-                
-                // Render gambar logo Team atau buat inisial huruf otomatis
-                if (logoUrl) {
-                    document.getElementById('teamLogoContainer').innerHTML = `
-                        <img src="${logoUrl}" class="rounded-4 me-3 object-fit-cover shadow-sm" style="width: 70px; height: 70px; min-width: 70px;" alt="Logo Team">
-                    `;
-                } else {
-                    const initial = name ? name.substring(0, 1).toUpperCase() : 'T';
-                    document.getElementById('teamLogoContainer').innerHTML = `
-                        <div class="bg-custom-blue text-white text-center fw-bold rounded-4 d-flex align-items-center justify-content-center mb-3 mb-sm-0 me-3 shadow-sm" style="width: 70px; height: 70px; font-size: 1.8rem; min-width: 70px;">
-                            ${initial}
-                        </div>
-                    `;
-                }
             });
-        });
+        }
+    });
     </script>
 </body>
 </html>

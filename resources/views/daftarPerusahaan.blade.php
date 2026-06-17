@@ -4,41 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNSCollab - Daftar Perusahaan</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.0/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="{{ asset('style.css') }}" />      
-    
-    <style>
-        /* Kustomisasi Skema Warna Utama ke #1FABE1 */
-        .bg-custom-blue {
-            background-color: #1FABE1 !important;
-            color: #fff !important;
-        }
-        .text-custom-blue {
-            color: #1FABE1 !important;
-        }
-        .btn-custom-blue {
-            background-color: #1FABE1 !important;
-            border-color: #1FABE1 !important;
-            color: #fff !important;
-        }
-        .btn-custom-blue:hover {
-            background-color: #158dbb !important;
-            border-color: #158dbb !important;
-            color: #fff !important;
-        }
-        /* Penyelarasan Outline Button untuk Detail */
-        .btn-outline-custom {
-            color: #1FABE1 !important;
-            border-color: #1FABE1 !important;
-        }
-        .btn-outline-custom:hover {
-            background-color: #1FABE1 !important;
-            border-color: #1FABE1 !important;
-            color: #fff !important;
-        }
-    </style>
 </head>
 <body>
 
@@ -161,24 +130,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (count($daftarPerusahaan) > 0)
+                        @if (isset($daftarPerusahaan) && (is_array($daftarPerusahaan) ? count($daftarPerusahaan) > 0 : $daftarPerusahaan->isNotEmpty()))
                             @foreach ($daftarPerusahaan as $row)
                                 <tr class="border-bottom">
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            @if(isset($row->company_logo) && $row->company_logo)
-                                                <img src="{{ asset('uploads/logos/' . $row->company_logo) }}" 
-                                                     alt="Logo {{ $row->company_name }}" 
-                                                     class="rounded-3 me-3 border" 
-                                                     style="width: 40px; height: 40px; object-fit: cover;">
-                                            @else
-                                                <div class="bg-custom-blue p-2 rounded-3 me-3 fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <div class="logo-wrapper" style="width: 40px; height: 40px; min-width: 40px; flex-shrink: 0;">
+                                                <div class="bg-custom-blue text-white rounded-3 fw-bold d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; font-size: 1.1rem;">
                                                     {{ strtoupper(substr($row->company_name, 0, 1)) }}
                                                 </div>
-                                            @endif
-                                            <div>
-                                                <span class="fw-bold d-block text-dark">{{ $row->company_name }}</span>
-                                                <small class="text-muted">ID: #CP-{{ $row->id_company }}</small>
+                                            </div>
+
+                                            <div class="overflow-hidden ms-3">
+                                                <span class="fw-bold d-block text-dark text-truncate" style="max-width: 180px;">{{ $row->company_name }}</span>
+                                                <small class="text-muted" title="ID Perusahaan Lengkap: {{ $row->id_company }}">
+                                                    ID: #CP-{{ \Illuminate\Support\Str::limit($row->id_company, 8, '...') }}
+                                                </small>
                                             </div>
                                         </div>
                                     </td>
@@ -188,29 +155,32 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="d-block fw-semibold text-dark"><i class="bi bi-telephone me-1 text-muted"></i> {{ $row->contact ? $row->contact : '-' }}</span>
-                                        <small class="text-muted"><i class="bi bi-envelope me-1"></i> {{ $row->email }}</small>
+                                        <span class="d-block fw-semibold text-dark" style="font-size: 0.9rem;">
+                                            <i class="bi bi-telephone me-1 text-muted"></i> {{ $row->contact ? $row->contact : '-' }}
+                                        </span>
+                                        <small class="text-muted d-block text-truncate" style="max-width: 180px;" title="{{ $row->email }}">
+                                            <i class="bi bi-envelope me-1"></i> {{ $row->email }}
+                                        </small>
                                     </td>
                                     <td>
-                                        <i class="bi bi-calendar3 me-1 text-muted"></i> 
-                                        {{ $row->create_at ? \Carbon\Carbon::parse($row->create_at)->locale('id')->isoFormat('D MMM YYYY') : '-' }}
+                                        <span style="font-size: 0.9rem; white-space: nowrap;">
+                                            <i class="bi bi-calendar3 me-1 text-muted"></i> 
+                                            {{ $row->create_at ? \Carbon\Carbon::parse($row->create_at)->locale('id')->isoFormat('D MMM YYYY') : '-' }}
+                                        </span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-custom-blue px-3 py-2 rounded-pill fw-bold">
+                                        <span class="badge bg-custom-blue px-3 py-2 rounded-pill fw-bold" style="font-size: 0.85rem;">
                                             {{ $row->total_lowongan }} Program
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center gap-1">
-                                            <button type="button" class="btn btn-outline-custom btn-sm px-2 rounded-3 btn-detail-company" 
+                                            <button type="button" class="btn btn-outline-secondary btn-sm d-flex flex-column align-items-center justify-content-center p-2 rounded-3 btn-detail-company" 
+                                                    style="width: 70px; height: 58px; font-size: 13px; font-weight: 500;"
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#modalDetailCompany" 
                                                     data-id="{{ $row->id_company }}">
-                                                <i class="bi bi-eye"></i> Detail
-                                            </button>
-                                            <button class="btn btn-light btn-sm text-danger border-0 rounded-3 px-2" 
-                                                    onclick="if(confirm('Apakah Anda yakin ingin menghapus kemitraan perusahaan {{ $row->company_name }}?')) { window.location.href='{{ url('/daftar-perusahaan/hapus/' . $row->id_company) }}'; }">
-                                                <i class="bi bi-trash"></i>
+                                                <i class="bi bi-eye mb-0.5" style="font-size: 16px; line-height: 1;"></i> Detail
                                             </button>
                                         </div>
                                     </td>
@@ -236,12 +206,23 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center pb-4 mb-4 border-bottom">
-                        <div id="companyAvatarContainer" class="mb-3 mb-sm-0 me-0 me-sm-4">
-                            </div>
+                        <div id="companyAvatarContainer" class="mb-3 mb-sm-0 me-0 me-sm-4"></div>
                         <div class="w-100 overflow-hidden">
                             <h3 class="fw-bold mb-2 text-dark" id="compName">-</h3>
-                            <div class="text-muted" style="font-size: 0.9rem;">
-                                <i class="bi bi-telephone-fill me-2 text-custom-blue"></i> <span id="compContact">-</span>
+                            <div class="row g-2 text-muted" style="font-size: 0.9rem;">
+                                <div class="col-md-6">
+                                    <div class="mb-1">
+                                        <i class="bi bi-telephone-fill me-2 text-custom-blue"></i> <span id="compContact">-</span>
+                                    </div>
+                                    <div>
+                                        <i class="bi bi-envelope-fill me-2 text-custom-blue"></i> <span id="compEmail">-</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div>
+                                        <i class="bi bi-calendar-check-fill me-2 text-custom-blue"></i> <span class="fw-semibold">Bergabung:</span> <span id="compJoined">-</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -279,8 +260,8 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     
     <script>
         const ctxCompany = document.getElementById('companiesChart').getContext('2d');
@@ -326,8 +307,10 @@
                 const companyId = button.getAttribute('data-id');
                 
                 document.getElementById('compName').textContent = 'Memuat...';
-                document.getElementById('companyAvatarContainer').innerHTML = '<div class="bg-custom-blue text-center fw-bold rounded-4 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px; font-size: 2rem;">-</div>';
+                document.getElementById('companyAvatarContainer').innerHTML = '<div class="bg-custom-blue text-center fw-bold rounded-4 d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px; font-size: 2rem;">-</div>';
                 document.getElementById('compContact').textContent = '-';
+                document.getElementById('compEmail').textContent = '-';
+                document.getElementById('compJoined').textContent = '-';
                 document.getElementById('compBio').textContent = '-';
                 document.getElementById('internshipList').innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-custom-blue me-2"></div>Memuat program magang...</td></tr>';
                 
@@ -344,26 +327,27 @@
                         
                         document.getElementById('compName').textContent = comp.company_name;
                         document.getElementById('compContact').textContent = comp.contact || comp.contact_person || comp.phone || '-';
+                        document.getElementById('compEmail').textContent = comp.email || (comp.user ? comp.user.email : '-') || '-';
                         document.getElementById('compBio').textContent = comp.bio || comp.description || 'Belum ada deskripsi profil mengenai perusahaan ini.';
                         
-                        // LOGIKA LOGO DUSTRIBUTIF DI DALAM JAVASCRIPT MODAL
-                        if (comp.company_logo) {
-                            document.getElementById('companyAvatarContainer').innerHTML = `
-                                <img src="/uploads/logos/${comp.company_logo}" 
-                                     alt="Logo ${comp.company_name}" 
-                                     class="rounded-4 border shadow-sm" 
-                                     style="width: 70px; height: 70px; object-fit: cover; min-width: 70px;">
-                            `;
+                        let rawJoinedDate = comp.create_at || comp.created_at || (comp.user ? comp.user.created_at : null);
+                        if (rawJoinedDate) {
+                            let joinedDateObj = new Date(rawJoinedDate);
+                            document.getElementById('compJoined').textContent = !isNaN(joinedDateObj) 
+                                ? joinedDateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) 
+                                : rawJoinedDate;
                         } else {
-                            let initial = comp.company_name ? comp.company_name.substring(0, 1).toUpperCase() : '-';
-                            document.getElementById('companyAvatarContainer').innerHTML = `
-                                <div class="bg-custom-blue text-center text-white fw-bold rounded-4 d-flex align-items-center justify-content-center shadow-sm" 
-                                     style="width: 70px; height: 70px; font-size: 2rem; min-width: 70px;">
-                                    ${initial}
-                                </div>
-                            `;
+                            document.getElementById('compJoined').textContent = '-';
                         }
-                        
+                                                                                                     
+                        let initial = comp.company_name ? comp.company_name.substring(0, 1).toUpperCase() : '-';
+                        document.getElementById('companyAvatarContainer').innerHTML = `
+                            <div class="bg-custom-blue text-center text-white fw-bold rounded-4 d-flex align-items-center justify-content-center shadow-sm" 
+                                 style="width: 70px; height: 70px; font-size: 2.2rem; min-width: 70px;">
+                                ${initial}
+                            </div>
+                        `;
+                                                                                                     
                         let htmlList = '';
                         if(jobs && jobs.length > 0) {
                             jobs.forEach(job => {

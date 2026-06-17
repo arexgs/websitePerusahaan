@@ -32,10 +32,8 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
+            'root' => storage_path('app'),
             'throw' => false,
-            'report' => false,
         ],
 
         'public' => [
@@ -47,19 +45,16 @@ return [
             'report' => false,
         ],
 
-        's3' => [
+        'supabase' => [
             'driver' => 's3',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
-            'url' => env('AWS_URL'),
-            'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
-            'report' => false,
-        ],
-
+            'key' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkY2pnb25qanJ4aGdobGJkYXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNTkzMDMsImV4cCI6MjA5NjgzNTMwM30.PbvvDNzw2X0evntV2Ksw_tbypR2DjE8R4r7nUW7DHeM',
+            'secret' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkY2pnb25qanJ4aGdobGJkYXJ6Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTI1OTMwMywiZXhwIjoyMDk2ODM1MzAzfQ.WYoCV0KXRbhd341cyjYyf6iiZu4Ksf4t5mJb855iNKQ',
+            'region' => 'us-east-1',
+            'bucket' => 'logo-comp',
+            'endpoint' => 'https://qdcjgonjjrxhghlbdarz.supabase.co/storage/v1/s3',
+            'use_path_style_endpoint' => true,
+            'url' => 'https://qdcjgonjjrxhghlbdarz.supabase.co/storage/v1/object/public/logo-comp',
+            ],
     ],
 
     /*

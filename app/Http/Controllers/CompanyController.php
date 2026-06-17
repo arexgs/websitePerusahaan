@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage; 
 
 class companyController extends Controller
 {
@@ -29,7 +30,6 @@ class companyController extends Controller
             ->orderBy(DB::raw("EXTRACT(MONTH FROM u.created_at)"), 'ASC')
             ->get();
 
-        // PASTIKAN: Menggunakan CamelCase (C besar) agar sama dengan yang dipanggil di Blade View
         $monthsCompanies = [];
         $countsCompanies = [];
         foreach ($resChartComp as $row) {
@@ -80,10 +80,11 @@ class companyController extends Controller
                 'c.company_name', 
                 'c.industry_field',
                 'c.contact',
+                'c.company_logo', // --- PERBAIKAN: Wajib di-select agar bisa dibaca di looping ---
                 'u.email',
                 'u.created_at as create_at', 
-                DB::raw('(SELECT COUNT(*) FROM internships i WHERE i.id_company = c.id_company) AS total_lowongan')
-            );
+                DB::raw('(SELECT COUNT(*) FROM internships i WHERE i.id_company = c.id_company) AS total_lowongan'
+            ));
 
         if (!empty($searchQuery)) {
             $querycompaniesList->where(function ($q) use ($searchQuery) {
@@ -94,7 +95,15 @@ class companyController extends Controller
 
         $daftarPerusahaan = $querycompaniesList->orderBy('c.id_company', 'DESC')->get();
 
-        // PASTIKAN: Di dalam compact() menggunakan 'monthsCompanies' dan 'countsCompanies'
+        // --- PERBAIKAN: Looping Generate URL Supabase untuk Tabel Utama ---
+        foreach ($daftarPerusahaan as $row) {
+            if (!empty($row->company_logo)) {
+                $row->logo_url = Storage::disk('supabase')->url($row->company_logo);
+            } else {
+                $row->logo_url = null;
+            }
+        }
+
         return view('daftarPerusahaan', compact(
             'searchQuery',
             'monthsCompanies',
@@ -118,23 +127,40 @@ class companyController extends Controller
         }
     }
 
+    // Fungsi JSON Detail (Dipakai oleh Fetch JavaScript API)
     public function getDetailJson($id)
-{
-    // Mengambil profil perusahaan beserta daftar lowongan kerja yang dimilikinya
-    $perusahaan = \DB::table('companies')->where('id_company', $id)->first();
-    
-    if (!$perusahaan) {
-        return response()->json(['error' => 'Data tidak ditemukan'], 404);
+    {
+        $perusahaan = DB::table('companies as c')
+            ->join('users as u', 'c.id_user', '=', 'u.id_user')
+            ->select('c.*', 'u.email', 'u.created_at as create_at')
+            ->where('c.id_company', $id)
+            ->first();
+        
+        if (!$perusahaan) {
+            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        }
+
+        // --- PERBAIKAN: Menggunakan kolom 'company_logo' dan generate URL Supabase ---
+        if (!empty($perusahaan->company_logo)) {
+            $perusahaan->logo_url = Storage::disk('supabase')->url($perusahaan->company_logo);
+        } else {
+            $perusahaan->logo_url = null; 
+        }
+
+        $lowongan = DB::table('internships')
+            ->where('id_company', $id)
+            ->orderBy('id_internship', 'desc')
+            ->get();
+
+        return response()->json([
+            'company' => $perusahaan,
+            'internships' => $lowongan
+        ]);
     }
 
-    $lowongan = \DB::table('internships')
-        ->where('id_company', $id)
-        ->orderBy('id_internship', 'desc')
-        ->get();
-
-    return response()->json([
-        'company' => $perusahaan,
-        'internships' => $lowongan
-    ]);
-}
+    // Fungsi Duplikat Cadangan (Disamakan strukturnya agar aman jika route memanggil fungsi ini)
+    public function getDetailPerusahaan($id)
+    {
+        return $this->getDetailJson($id);
+    }
 }
