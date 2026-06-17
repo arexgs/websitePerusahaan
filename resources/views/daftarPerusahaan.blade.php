@@ -18,7 +18,7 @@
 
         <div class="nav-label">Menu Utama</div>
         <nav class="d-flex flex-column">
-            <a class="nav-link-item" href="{{ url('/dashboard') }}">
+            <a class="nav-link-item" href="{{ url('/dashboard-admin') }}">
                 <i class="bi bi-grid-1x2"></i> Dashboard
             </a> 
             <a class="nav-link-item" href="{{ url('/validasi-magang') }}">

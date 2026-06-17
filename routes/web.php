@@ -57,7 +57,7 @@ Route::delete('/daftar-team/hapus/{id}', [TeamController::class, 'destroy']);
 | 3. Rute Khusus Perusahaan (Company Dashboard)
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+Route::get('/dashboard', [DashboardController::class, 'dashboardAdmin']);
 
 
 /*
