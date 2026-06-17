@@ -10,7 +10,7 @@ use Carbon\Carbon;
 
 class TeamController extends Controller
 {
-    public function index(Request $request)
+    public function indexAdmin(Request $request)
     {
         $searchQuery = $request->input('search');
 

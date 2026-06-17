@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Storage;
 
 class companyController extends Controller
 {
-    public function index(Request $request)
+    public function indexAdmin(Request $request)
     {
         // Tangkap query pencarian
         $searchQuery = $request->query('search', '');

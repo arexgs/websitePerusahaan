@@ -4,24 +4,59 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Exception;
 
 class PengaturanController extends Controller
 {
-    public function index(Request $request)
+    public function indexPengaturan(Request $request)
     {
-        // 1. Tangkap query pencarian jika nanti dibutuhkan di halaman pengaturan
         $searchQuery = $request->query('search', '');
+        $userId = session('user_id');
 
-        // 2. Mengambil 5 aktivitas terbaru dari admin yang sedang login secara dinamis
-        // Menggunakan Auth::id() untuk mengambil ID admin yang sedang aktif aman dari error null
-        $adminLogs = DB::table('admin_activity_logs') 
-            ->where('admin_id', Auth::id())   
-            ->orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        // JIKA SESSION KOSONG: Ambil data default untuk testing
+        if (!$userId) {
+            $defaultAdmin = DB::table('users')->where('role', 'admin')->first();
+            if ($defaultAdmin) {
+                $userId = $defaultAdmin->id_user;
+                
+                // Cari detail id_admin dari user default
+                $adminDetail = DB::table('admins')->where('id_user', $userId)->first();
 
-        // 3. Menghitung data statistik counter untuk card info di atas tabel/halaman
+                session([
+                    'user_id'    => $defaultAdmin->id_user,
+                    'user_email' => $defaultAdmin->email,
+                    'user_type'  => $defaultAdmin->role,
+                    'type_id'    => $adminDetail ? (string) $adminDetail->id_admin : null
+                ]);
+            }
+        }
+
+        // 1. Mengambil 5 aktivitas terbaru berdasarkan id_admin (bukan id_user)
+        $adminLogs = [];
+        
+        // Ambil id_admin dari session 'type_id' yang diset saat login
+        $idAdmin = session('type_id');
+
+        // Jika session 'type_id' tidak ada, kita bantu cari manual berdasarkan id_user
+        if (!$idAdmin && $userId) {
+            $adminDetail = DB::table('admins')->where('id_user', $userId)->first();
+            if ($adminDetail) {
+                $idAdmin = $adminDetail->id_admin;
+                session(['type_id' => (string) $idAdmin]);
+            }
+        }
+
+        if ($idAdmin) {
+            $adminLogs = DB::table('admin_logs') 
+                ->where('id_admin', $idAdmin) // Diubah dari $userId menjadi $idAdmin sesuai ERD
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+        }
+
+        // 2. Menghitung data statistik counter
         $totalPending = DB::table('internships')
             ->where('approval_status', 'pending')
             ->count();
@@ -30,31 +65,67 @@ class PengaturanController extends Controller
             ->where('approval_status', 'approved')
             ->count();
 
-        // 4. Return ke view 'pengaturan' dengan membawa variabel kembarannya
         return view('pengaturan', compact('adminLogs', 'totalPending', 'totalAccepted', 'searchQuery'));
     }
 
     public function simpan(Request $request)
     {
-        // Validasi input form pengaturan akun
         $request->validate([
-            'admin_name' => 'required|string|max:255',
-            'validation_method' => 'required|in:manual,auto',
+            'validation_method'   => 'required|in:manual,auto',
             'document_expiration' => 'required|in:7,14,30',
         ]);
 
-        // [TULIS KODE UPDATE PARAMETER KAMU DI SINI]
-        // Contoh jika disimpan ke tabel konfigurasi web:
-        // DB::table('system_settings')->where('id', 1)->update([...]);
+        $userId = session('user_id');
+        $idAdmin = session('type_id');
 
-        // Tambahkan riwayat baru ke log aktivitas secara otomatis saat admin klik simpan
-        DB::table('admin_activity_logs')->insert([
-            'admin_id' => Auth::id(),
-            'activity_description' => 'Mengubah konfigurasi sistem dan parameter kontrol web',
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        // Logika Ganti Password
+        if ($request->filled('current_password')) {
+            $user = DB::table('users')->where('id_user', $userId)->first();
 
-        return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui!');
+            if (!$user || !Hash::check($request->current_password, $user->password)) {
+                return redirect()->back()->withErrors(['current_password' => 'Password saat ini yang Anda masukkan salah.']);
+            }
+
+            $request->validate([
+                'new_password' => 'required|string|min:8|confirmed',
+            ]);
+
+            DB::table('users')
+                ->where('id_user', $userId)
+                ->update([
+                    'password' => Hash::make($request->new_password),
+                ]);
+        }
+
+        // Catat riwayat perubahan menggunakan helper agar terhindar dari bug id_user/id_admin
+        $this->logAdminActivity('Mengubah konfigurasi sistem dan parameter kontrol web');
+
+        return redirect()->back()->with('success', 'Pengaturan akun dan sistem berhasil diperbarui!');
+    }
+
+    /**
+     * Helper khusus untuk mencatat aktivitas ke tabel admin_logs menggunakan id_admin (UUID)
+     */
+    private function logAdminActivity($actionDescription)
+    {
+        $idAdmin = session('type_id'); 
+
+        // Jika tidak ada di session, kita cari manual ke database berdasarkan id_user
+        if (!$idAdmin && session('user_id')) {
+            $admin = DB::table('admins')->where('id_user', session('user_id'))->first();
+            if ($admin) {
+                $idAdmin = $admin->id_admin;
+                session(['type_id' => (string) $idAdmin]);
+            }
+        }
+
+        if ($idAdmin) {
+            DB::table('admin_logs')->insert([
+                'id_admin_log' => (string) Str::uuid(), 
+                'id_admin'     => $idAdmin,
+                'action'       => $actionDescription,
+                'created_at'   => now(),
+            ]);
+        }
     }
 }
