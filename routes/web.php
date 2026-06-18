@@ -2,15 +2,24 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+
+// ── Controller Autentikasi ──
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\PasswordController;
-use App\Http\Controllers\UploadController;
-use App\Http\Controllers\TeamController;
+
+// ── Controller Dashboard & Umum ──
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardAdminController;
 use App\Http\Controllers\PengaturanController;
+use App\Http\Controllers\UploadController;
+
+// ── Controller Entitas (Company & Team) ──
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DaftarCompanyController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\DaftarTeamController;
+use App\Http\Controllers\InternshipController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,7 +29,7 @@ use App\Http\Controllers\PengaturanController;
 Route::get('/', fn() => view('index'));
 Route::get('/register', fn() => view('register'));
 
-// Aksi Autentikasi (Mendukung endpoint web biasa dan endpoint API JavaScript kamu)
+// Aksi Autentikasi (Mendukung endpoint web biasa dan endpoint API JavaScript)
 Route::post('/login', [LoginController::class, 'store']);
 Route::post('/api/login', [LoginController::class, 'store']); 
 Route::post('/register', [RegisterController::class, 'store']);
@@ -29,36 +38,34 @@ Route::post('/logout', function (Request $request) {
     return response()->json(['success' => true]);
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | 2. Rute Khusus Admin
 |--------------------------------------------------------------------------
 */
-// Menggunakan rute '/dashboard-admin' sesuai dengan redirect LoginController pasca perbaikan JS
-Route::get('/dashboard-admin', [DashboardController::class, 'dashboardAdmin']);
-Route::get('/admin-dashboard', [DashboardController::class, 'adminIndex']); // Menjaga kompatibilitas jika ada link lama
+// Dashboard Admin (Menjaga kompatibilitas jika ada link lama)
+Route::get('/dashboard-admin', [DashboardAdminController::class, 'dashboardAdmin']);
+Route::get('/admin-dashboard', [DashboardController::class, 'adminIndex']); // Dari file 1
 
 // Validasi Lowongan Magang
-Route::get('/validasi-magang', [DashboardController::class, 'validasiMagang']);
-Route::get('/validasi-magang/proses', [DashboardController::class, 'prosesValidasi']);
+Route::get('/validasi-magang', [DashboardAdminController::class, 'validasiMagang']);
+Route::get('/validasi-magang/proses', [DashboardAdminController::class, 'prosesValidasi']);
 
-// Manajemen Daftar Perusahaan Mitra (Menggunakan indexAdmin agar tidak bentrok dengan dashboard company)
-Route::get('/daftar-perusahaan', [CompanyController::class, 'indexAdmin']);
-Route::get('/daftar-perusahaan/hapus/{id}', [CompanyController::class, 'destroy']);
+// Manajemen Daftar Perusahaan Mitra
+Route::get('/daftar-perusahaan', [DaftarCompanyController::class, 'indexAdmin']);
+Route::get('/daftar-perusahaan/hapus/{id}', [DaftarCompanyController::class, 'destroy']);
 
 // Manajemen Daftar Team Mahasiswa
-Route::get('/daftar-team', [TeamController::class, 'indexAdmin']);
-Route::delete('/daftar-team/hapus/{id}', [TeamController::class, 'destroy']);
-
+Route::get('/daftar-team', [DaftarTeamController::class, 'indexAdmin']);
+Route::delete('/daftar-team/hapus/{id}', [DaftarTeamController::class, 'destroy']);
 
 /*
 |--------------------------------------------------------------------------
 | 3. Rute Khusus Perusahaan (Company Dashboard)
 |--------------------------------------------------------------------------
 */
-Route::get('/dashboard', [DashboardController::class, 'dashboardAdmin']);
-
+// Arahkan ke method dashboard company sesuai arsitektur file 2
+Route::get('/dashboard', [DashboardController::class, 'indexCompany']);
 
 /*
 |--------------------------------------------------------------------------
@@ -76,7 +83,6 @@ Route::post('/reset-password', [PasswordController::class, 'doReset']);
 
 // Upload File ke Supabase Storage via Controller
 Route::post('/upload-supabase', [UploadController::class, 'uploadToSupabase'])->name('upload.supabase');
-
 
 /*
 |--------------------------------------------------------------------------

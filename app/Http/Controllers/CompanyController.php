@@ -4,163 +4,304 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+use App\Services\SupabaseStorageService;
 
-class companyController extends Controller
+class CompanyController extends Controller
 {
-    public function indexAdmin(Request $request)
+    private SupabaseStorageService $storage;
+
+    public function __construct(SupabaseStorageService $storage)
     {
-        // Tangkap query pencarian
-        $searchQuery = $request->query('search', '');
+        $this->storage = $storage;
+    }
 
-        // A. Tren Registrasi Perusahaan 6 Bulan Terakhir
-        $resChartComp = DB::table('users as u')
-            ->join('companies as c', 'u.id_user', '=', 'c.id_user')
+    private function logActivity(string $action)
+    {
+        $companyId = session('type_id');
+        if (!$companyId) return;
+        DB::table('activity_logs')->insert([
+            'id_activity_log' => DB::raw('gen_random_uuid()'),
+            'id_company'      => $companyId,
+            'action'          => $action,
+            'created_at'      => now(),
+        ]);
+    }
+
+    public function getProfile()
+    {
+        $companyId = session('type_id');
+
+        $company = DB::table('companies')
+            ->join('users', 'companies.id_user', '=', 'users.id_user')
+            ->where('companies.id_company', $companyId)
             ->select(
-                DB::raw("TO_CHAR(u.created_at, 'Mon YYYY') AS bulan"),
-                DB::raw("COUNT(c.id_company) AS total_reg")
+                'companies.id_company',
+                'companies.company_name',
+                'companies.industry_field',
+                'companies.description',
+                'companies.contact',
+                'companies.company_logo',
+                'users.email'
             )
-            ->where('u.created_at', '>=', DB::raw("NOW() - INTERVAL '6 MONTH'"))
-            ->groupBy(
-                DB::raw("EXTRACT(YEAR FROM u.created_at)"), 
-                DB::raw("EXTRACT(MONTH FROM u.created_at)"), 
-                DB::raw("TO_CHAR(u.created_at, 'Mon YYYY')")
-            )
-            ->orderBy(DB::raw("EXTRACT(YEAR FROM u.created_at)"), 'ASC')
-            ->orderBy(DB::raw("EXTRACT(MONTH FROM u.created_at)"), 'ASC')
-            ->get();
+            ->first();
 
-        $monthsCompanies = [];
-        $countsCompanies = [];
-        foreach ($resChartComp as $row) {
-            $monthsCompanies[] = $row->bulan;
-            $countsCompanies[] = $row->total_reg;
+        if (!$company) {
+            return response()->json(['success' => false, 'message' => 'Perusahaan tidak ditemukan'], 404);
         }
 
-        // B. Tren Pertumbuhan Lowongan Magang 6 Bulan Terakhir
-        $resChartIntern = DB::table('internships')
-            ->select(
-                DB::raw("TO_CHAR(deadline, 'Mon YYYY') AS bulan"),
-                DB::raw("COUNT(id_internship) AS total_intern")
-            )
-            ->where('deadline', '>=', DB::raw("NOW() - INTERVAL '6 MONTH'"))
-            ->groupBy(
-                DB::raw("EXTRACT(YEAR FROM deadline)"), 
-                DB::raw("EXTRACT(MONTH FROM deadline)"), 
-                DB::raw("TO_CHAR(deadline, 'Mon YYYY')")
-            )
-            ->orderBy(DB::raw("EXTRACT(YEAR FROM deadline)"), 'ASC')
-            ->orderBy(DB::raw("EXTRACT(MONTH FROM deadline)"), 'ASC')
-            ->get();
-
-        $monthsIntern = [];
-        $countsIntern = [];
-        foreach ($resChartIntern as $row) {
-            $monthsIntern[] = $row->bulan;
-            $countsIntern[] = $row->total_intern;
+        // Convert path logo (tersimpan di DB) jadi public URL Supabase
+        if (!empty($company->company_logo)) {
+            $company->company_logo = $this->storage->publicUrl('logo-comp', $company->company_logo);
         }
 
-        // C. Counter Peningkatan Bulan Ini
-        $compThisMonth = DB::table('companies as c')
-            ->join('users as u', 'c.id_user', '=', 'u.id_user')
-            ->whereRaw("EXTRACT(MONTH FROM u.created_at) = EXTRACT(MONTH FROM NOW())")
-            ->whereRaw("EXTRACT(YEAR FROM u.created_at) = EXTRACT(YEAR FROM NOW())")
+        return response()->json(['success' => true, 'data' => $company]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $companyId   = session('type_id');
+        $data        = $request->json()->all();
+        $name        = trim($data['company_name'] ?? '');
+        $industry    = trim($data['industry_field'] ?? '');
+        $description = trim($data['description'] ?? '');
+        $contact     = trim($data['contact'] ?? '');
+
+        if (empty($name)) {
+            return response()->json(['success' => false, 'message' => 'Nama perusahaan tidak boleh kosong'], 400);
+        }
+
+        DB::table('companies')->where('id_company', $companyId)->update([
+            'company_name'   => $name,
+            'industry_field' => $industry,
+            'description'    => $description,
+            'contact'        => $contact,
+        ]);
+
+        session(['user_name' => $name]);
+        $this->logActivity('Update profil perusahaan');
+
+        return response()->json(['success' => true, 'message' => 'Profil berhasil disimpan']);
+    }
+
+    public function updateLogo(Request $request)
+    {
+        $companyId = session('type_id');
+
+        if (!$request->hasFile('logo')) {
+            return response()->json(['success' => false, 'message' => 'File logo tidak ditemukan'], 400);
+        }
+
+        $file = $request->file('logo');
+
+        $error = $this->storage->validateFile($file, ['jpg', 'jpeg', 'png', 'webp'], 2 * 1024 * 1024);
+        if ($error) {
+            return response()->json(['success' => false, 'message' => $error], 400);
+        }
+
+        // Upload ke bucket Supabase 'logo-comp', dikelompokkan per id_company
+        $result = $this->storage->upload($file, 'logo-comp', $companyId);
+
+        if (!$result['success']) {
+            return response()->json(['success' => false, 'message' => 'Gagal upload logo: ' . $result['error']], 500);
+        }
+
+        // Hapus logo lama dari Supabase kalau ada, supaya storage tidak menumpuk
+        $old = DB::table('companies')->where('id_company', $companyId)->first();
+        if (!empty($old?->company_logo)) {
+            $this->storage->delete('logo-comp', $old->company_logo);
+        }
+
+        DB::table('companies')->where('id_company', $companyId)->update([
+            'company_logo' => $result['path'],
+        ]);
+
+        $this->logActivity('Ganti logo perusahaan');
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Logo berhasil diupload!',
+            'logo_url' => $result['public_url'],
+        ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $companyId = session('type_id');
+        $data      = $request->json()->all();
+        $username  = trim($data['username'] ?? '');
+        $phone     = trim($data['phone'] ?? '');
+
+        DB::table('companies')->where('id_company', $companyId)->update([
+            'company_name' => $username,
+            'contact'      => $phone,
+        ]);
+
+        session(['user_name' => $username]);
+        $this->logActivity('Update pengaturan akun');
+
+        return response()->json(['success' => true, 'message' => 'Pengaturan berhasil disimpan']);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $userId = session('user_id');
+        $data   = $request->json()->all();
+
+        $oldPassword = $data['old_password'] ?? '';
+        $newPassword = $data['new_password'] ?? '';
+
+        if (empty($oldPassword) || empty($newPassword)) {
+            return response()->json(['success' => false, 'message' => 'Password lama dan baru wajib diisi'], 400);
+        }
+
+        if (strlen($newPassword) < 6) {
+            return response()->json(['success' => false, 'message' => 'Password baru minimal 6 karakter'], 400);
+        }
+
+        $users = DB::table('users')->where('id_user', $userId)->first();
+
+        if (!$users || !Hash::check($oldPassword, $users->password)) {
+            return response()->json(['success' => false, 'message' => 'Password lama salah'], 401);
+        }
+
+        DB::table('users')->where('id_user', $userId)->update([
+            'password' => Hash::make($newPassword),
+        ]);
+
+        $this->logActivity('Ubah password akun');
+
+        return response()->json(['success' => true, 'message' => 'Password berhasil diubah']);
+    }
+
+    public function getActivities()
+    {
+        $companyId  = session('type_id');
+        $activities = DB::table('activity_logs')
+            ->where('id_company', $companyId)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json(['success' => true, 'data' => $activities]);
+    }
+
+    // FIX #3: Method index untuk daftarPerusahaan dengan semua variabel chart yang dibutuhkan blade
+    public function index(Request $request)
+    {
+        if (!session('user_id') || session('user_type') !== 'admin') {
+            return redirect('/');
+        }
+
+        $searchQuery = $request->input('search');
+
+        // Tren registrasi perusahaan 6 bulan terakhir
+        $chartCompanies = DB::table('companies')
+            ->join('users', 'companies.id_user', '=', 'users.id_user')
+            ->select(
+                DB::raw("TO_CHAR(users.created_at, 'Mon YYYY') as bulan"),
+                DB::raw("COUNT(companies.id_company) as total_reg"),
+                DB::raw("DATE_TRUNC('month', users.created_at) as bulan_sort")
+            )
+            ->where('users.created_at', '>=', Carbon::now()->subMonths(6))
+            ->groupBy(
+                DB::raw("TO_CHAR(users.created_at, 'Mon YYYY')"),
+                DB::raw("DATE_TRUNC('month', users.created_at)")
+            )
+            ->orderBy('bulan_sort', 'asc')
+            ->get();
+
+        $monthsCompanies = $chartCompanies->pluck('bulan')->toArray();
+        $countsCompanies = $chartCompanies->pluck('total_reg')->toArray();
+
+        // Tren lowongan magang 6 bulan terakhir
+        $chartIntern = DB::table('internships')
+            ->select(
+                DB::raw("TO_CHAR(deadline, 'Mon YYYY') as bulan"),
+                DB::raw("COUNT(id_internship) as total_intern"),
+                DB::raw("DATE_TRUNC('month', deadline) as bulan_sort")
+            )
+            ->where('deadline', '>=', Carbon::now()->subMonths(6))
+            ->groupBy(
+                DB::raw("TO_CHAR(deadline, 'Mon YYYY')"),
+                DB::raw("DATE_TRUNC('month', deadline)")
+            )
+            ->orderBy('bulan_sort', 'asc')
+            ->get();
+
+        $monthsIntern = $chartIntern->pluck('bulan')->toArray();
+        $countsIntern = $chartIntern->pluck('total_intern')->toArray();
+
+        // Counter bulan ini
+        $compThisMonth   = DB::table('companies')
+            ->join('users', 'companies.id_user', '=', 'users.id_user')
+            ->whereMonth('users.created_at', Carbon::now()->month)
+            ->whereYear('users.created_at', Carbon::now()->year)
             ->count();
 
         $internThisMonth = DB::table('internships')
-            ->whereRaw("EXTRACT(MONTH FROM deadline) = EXTRACT(MONTH FROM NOW())")
-            ->whereRaw("EXTRACT(YEAR FROM deadline) = EXTRACT(YEAR FROM NOW())")
+            ->whereMonth('deadline', Carbon::now()->month)
+            ->whereYear('deadline', Carbon::now()->year)
             ->count();
 
-        // 3. QUERY UTAMA: DAFTAR PERUSAHAAN & JUMLAH LOWONGAN
-        $querycompaniesList = DB::table('companies as c')
-            ->join('users as u', 'c.id_user', '=', 'u.id_user')
+        // Query daftar perusahaan
+        $query = DB::table('companies')
+            ->join('users', 'companies.id_user', '=', 'users.id_user')
+            ->leftJoin(
+                DB::raw('(SELECT id_company, COUNT(*) as total_lowongan FROM internships GROUP BY id_company) as intern_count'),
+                'companies.id_company', '=', 'intern_count.id_company'
+            )
             ->select(
-                'c.id_company',
-                'c.company_name', 
-                'c.industry_field',
-                'c.contact',
-                'c.company_logo', // --- PERBAIKAN: Wajib di-select agar bisa dibaca di looping ---
-                'u.email',
-                'u.created_at as create_at', 
-                DB::raw('(SELECT COUNT(*) FROM internships i WHERE i.id_company = c.id_company) AS total_lowongan'
-            ));
+                'companies.id_company',
+                'companies.company_name',
+                'companies.industry_field',
+                'companies.contact',
+                'users.email',
+                'users.created_at as create_at',
+                DB::raw('COALESCE(intern_count.total_lowongan, 0) as total_lowongan')
+            );
 
         if (!empty($searchQuery)) {
-            $querycompaniesList->where(function ($q) use ($searchQuery) {
-                $q->where('c.company_name', 'ILIKE', "%{$searchQuery}%")
-                  ->orWhere('c.industry_field', 'ILIKE', "%{$searchQuery}%");
+            $query->where(function ($q) use ($searchQuery) {
+                $q->where('companies.company_name', 'ILIKE', '%' . $searchQuery . '%')
+                  ->orWhere('companies.industry_field', 'ILIKE', '%' . $searchQuery . '%');
             });
         }
 
-        $daftarPerusahaan = $querycompaniesList->orderBy('c.id_company', 'DESC')->get();
-
-        // --- PERBAIKAN: Looping Generate URL Supabase untuk Tabel Utama ---
-        foreach ($daftarPerusahaan as $row) {
-            if (!empty($row->company_logo)) {
-                $row->logo_url = Storage::disk('supabase')->url($row->company_logo);
-            } else {
-                $row->logo_url = null;
-            }
-        }
+        $daftarPerusahaan = $query->orderBy('users.created_at', 'desc')->get();
 
         return view('daftarPerusahaan', compact(
+            'daftarPerusahaan',
             'searchQuery',
             'monthsCompanies',
             'countsCompanies',
             'monthsIntern',
             'countsIntern',
             'compThisMonth',
-            'internThisMonth',
-            'daftarPerusahaan'
+            'internThisMonth'
         ));
     }
 
+    // Hapus perusahaan
     public function destroy($id)
     {
-        $deleted = DB::table('companies')->where('id_company', $id)->delete();
-
-        if ($deleted) {
-            return redirect('/daftar-perusahaan')->with('success', 'Kemitraan perusahaan berhasil dihapus.');
-        } else {
-            return redirect('/daftar-perusahaan')->with('error', 'Gagal menghapus data perusahaan.');
-        }
-    }
-
-    // Fungsi JSON Detail (Dipakai oleh Fetch JavaScript API)
-    public function getDetailJson($id)
-    {
-        $perusahaan = DB::table('companies as c')
-            ->join('users as u', 'c.id_user', '=', 'u.id_user')
-            ->select('c.*', 'u.email', 'u.created_at as create_at')
-            ->where('c.id_company', $id)
-            ->first();
-        
-        if (!$perusahaan) {
-            return response()->json(['error' => 'Data tidak ditemukan'], 404);
+        if (!session('user_id') || session('user_type') !== 'admin') {
+            return redirect('/');
         }
 
-        // --- PERBAIKAN: Menggunakan kolom 'company_logo' dan generate URL Supabase ---
-        if (!empty($perusahaan->company_logo)) {
-            $perusahaan->logo_url = Storage::disk('supabase')->url($perusahaan->company_logo);
-        } else {
-            $perusahaan->logo_url = null; 
+        // Hapus data terkait dulu
+        $company = DB::table('companies')->where('id_company', $id)->first();
+        if (!$company) {
+            return redirect('/daftar-perusahaan')->with('error', 'Perusahaan tidak ditemukan.');
         }
 
-        $lowongan = DB::table('internships')
-            ->where('id_company', $id)
-            ->orderBy('id_internship', 'desc')
-            ->get();
+        // Hapus internships milik perusahaan ini, lalu perusahaannya, lalu user-nya
+        DB::table('internships')->where('id_company', $id)->delete();
+        DB::table('activity_logs')->where('id_company', $id)->delete();
+        DB::table('companies')->where('id_company', $id)->delete();
+        DB::table('users')->where('id_user', $company->id_user)->delete();
 
-        return response()->json([
-            'company' => $perusahaan,
-            'internships' => $lowongan
-        ]);
-    }
-
-    // Fungsi Duplikat Cadangan (Disamakan strukturnya agar aman jika route memanggil fungsi ini)
-    public function getDetailPerusahaan($id)
-    {
-        return $this->getDetailJson($id);
+        return redirect('/daftar-perusahaan')->with('success', 'Perusahaan berhasil dihapus.');
     }
 }

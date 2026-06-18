@@ -82,7 +82,7 @@ class LoginController extends Controller
                 ]);
             }
 
-            // 7. Tentukan halaman redirect
+            // 7. Tentukan halaman redirect (Admin ke /dashboard-admin, Company ke /dashboard)
             $redirect = $role === 'admin' ? '/dashboard-admin' : '/dashboard';
 
             return response()->json([
@@ -93,11 +93,30 @@ class LoginController extends Controller
             ]);
 
         } catch (Exception $e) {
-            // JIKA ADA CODE YANG SALAH ATAU DATABASE ERROR, DIAKAN MENTAL KE SINI
             return response()->json([
                 'success' => false,
                 'message' => 'Sistem Error: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Aksi Logout - Menghapus seluruh data session dan mengarahkan kembali ke halaman awal
+     */
+    public function logout(Request $request)
+    {
+        // Hapus session login secara menyeluruh demi keamanan
+        $request->session()->flush();
+
+        // Cek jika request datang dari fetch API JavaScript
+        if ($request->wantsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => true,
+                'redirect' => url('/')
+            ]);
+        }
+
+        // Redirect form web biasa
+        return redirect('/'); 
     }
 }

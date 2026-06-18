@@ -80,11 +80,11 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-secondary small">Email Akun Utama *</label>
-                        <input type="email" class="form-control bg-light text-muted" value="{{ session('email') }}" readonly>
+                        <input type="email" class="form-control bg-light text-muted" value="{{ session('user_email') }}" readonly>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold text-secondary small">Level Akses (Role)</label>
-                        <input type="text" class="form-control bg-light text-muted text-uppercase" value="{{ session('role', 'admin') }}" readonly>
+                        <input type="text" class="form-control bg-light text-muted text-uppercase" value="{{ session('user_type', 'admin') }}" readonly>
                     </div>
                 </div>
 

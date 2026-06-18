@@ -42,7 +42,7 @@
         <div class="sidebar-bottom">
             <form action="{{ url('/logout') }}" method="POST" class="d-inline w-100">
                 @csrf
-                <button type="submit" class="nav-link-item text-danger border-0 bg-transparent w-100" style="text-align: left;">
+                <button type="submit" class="nav-link-item text-danger border-0 bg-transparent w-100 text-start">
                     <i class="bi bi-box-arrow-left"></i> Keluar
                 </button>
             </form>
@@ -126,32 +126,30 @@
                             @foreach ($daftarLowongan as $row)
                                 @php 
                                     $fileName = $row->supporting_document ? basename($row->supporting_document) : 'MOU_Mitra_Undef.pdf';
-                                    // Gunakan URL Supabase yang sudah di-generate controller, fallback ke asset lokal
                                     $fileLink = $row->file_url ?? asset('uploads/' . $fileName);
+                                    
+                                    // Mengambil inisial huruf pertama nama perusahaan
+                                    $initial = strtoupper(substr(trim(strip_tags($row->company_name)), 0, 1));
+                                    if(empty($initial)) {
+                                        $initial = 'M';
+                                    }
                                 @endphp
                                 <tr class="border-bottom">
                                     <td class="py-3">
                                         <div class="d-flex align-items-center">
-                                            @if($row->company_logo)
-                                                <img src="{{ asset('uploads/logos/' . $row->company_logo) }}" 
-                                                    alt="Logo {{ $row->company_name }}" 
-                                                    class="rounded-3 me-3 border" 
-                                                    style="width: 40px; height: 40px; object-fit: cover;">
-                                            @else
-                                                <div class="text-white p-2 rounded-3 me-3 d-flex align-items-center justify-content-center" 
-                                                    style="width: 40px; height: 40px; font-weight: bold; background-color: #1FABE1;">
-                                                    {{ strtoupper(substr($row->company_name, 0, 1)) }}
-                                                </div>
-                                            @endif
+                                            <div class="text-white rounded-3 me-3 d-flex align-items-center justify-content-center shadow-sm" 
+                                                 style="width: 40px; height: 40px; min-width: 40px; font-weight: bold; font-size: 1.1rem; background-color: #1FABE1; flex-shrink: 0;">
+                                                {{ $initial }}
+                                            </div>
                                             
                                             <div>
-                                                <span class="fw-bold d-block">{{ $row->company_name }}</span>
-                                                <small class="text-muted">{{ $row->industry_field }}</small>
+                                                <span class="fw-bold d-block text-dark" style="font-size: 14.5px;">{{ $row->company_name }}</span>
+                                                <small class="text-muted">{{ $row->industry_field ?? 'Mitra' }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="fw-semibold">{{ $row->internship_title }}</span>
+                                        <span class="fw-semibold text-dark">{{ $row->internship_title }}</span>
                                         <small class="text-muted d-block"><i class="bi bi-geo-alt"></i> {{ $row->location }}</small>
                                     </td>
                                     <td style="max-width: 200px;">
@@ -162,7 +160,9 @@
                                         </a>
                                     </td>
                                     <td>
-                                        {{ \Carbon\Carbon::parse($row->deadline)->locale('id')->isoFormat('D MMMM YYYY') }}
+                                        <span class="text-dark" style="font-size: 13.5px;">
+                                            {{ \Carbon\Carbon::parse($row->deadline)->locale('id')->isoFormat('D MMMM YYYY') }}
+                                        </span>
                                     </td>
                                     <td>
                                         @if (strtolower($row->approval_status) == 'pending')
@@ -185,7 +185,7 @@
                                                     data-id="{{ $row->id_internship }}">
                                                 Verifikasi
                                             </button>
-                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -213,7 +213,7 @@
                         <div class="d-flex align-items-center min-w-0 me-3">
                             <i class="bi bi-file-earmark-pdf-fill text-danger fs-1 me-3 flex-shrink-0"></i>
                             <div class="min-w-0">
-                                <p class="mb-0 fw-bold text-truncate text-dark" id="modalFileName" style="font-size: 0.95rem; max-width: 240px;" title="">MOU_Mitra.pdf</p>
+                                <p class="mb-0 fw-bold text-truncate text-dark" id="modalFileName" style="font-size: 0.95rem; max-width: 240px;">MOU_Mitra.pdf</p>
                                 <small class="text-muted d-block text-truncate">Kriteria Kerjasama Magang</small>
                             </div>
                         </div>

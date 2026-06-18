@@ -8,14 +8,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class TeamController extends Controller
+class DaftarTeamController extends Controller
 {
-    public function index(Request $request)
+    public function indexAdmin(Request $request)
     {
-        if (!session('user_id') || session('user_type') !== 'admin') {
-            return redirect('/');
-        }
-
         $searchQuery = $request->input('search');
 
         // 1. Tren Registrasi Team (6 Bulan Terakhir)
@@ -24,10 +20,7 @@ class TeamController extends Controller
                 DB::raw("COUNT(id_team) as total_reg")
             )
             ->where('created_at', '>=', Carbon::now()->subMonths(6))
-            ->groupBy(
-                DB::raw("TO_CHAR(created_at, 'Mon YYYY')"),
-                DB::raw("DATE_TRUNC('month', created_at)")
-            )
+            ->groupBy(DB::raw("TO_CHAR(created_at, 'Mon YYYY')"), DB::raw("DATE_TRUNC('month', created_at)"))
             ->orderBy(DB::raw("DATE_TRUNC('month', created_at)"), 'asc')
             ->get();
 
@@ -41,10 +34,7 @@ class TeamController extends Controller
                 DB::raw("COUNT(id_internship) as total_intern")
             )
             ->where('deadline', '>=', Carbon::now()->subMonths(6))
-            ->groupBy(
-                DB::raw("TO_CHAR(deadline, 'Mon YYYY')"),
-                DB::raw("DATE_TRUNC('month', deadline)")
-            )
+            ->groupBy(DB::raw("TO_CHAR(deadline, 'Mon YYYY')"), DB::raw("DATE_TRUNC('month', deadline)"))
             ->orderBy(DB::raw("DATE_TRUNC('month', deadline)"), 'asc')
             ->get();
 
@@ -53,46 +43,54 @@ class TeamController extends Controller
 
         // 3. Counter statistik bulan ini
         $teamsThisMonth = Team::whereMonth('created_at', Carbon::now()->month)
-            ->whereYear('created_at', Carbon::now()->year)
-            ->count();
-
+            ->whereYear('created_at', Carbon::now()->year)->count();
+            
         $internThisMonth = DB::table('internships')
             ->whereMonth('deadline', Carbon::now()->month)
-            ->whereYear('deadline', Carbon::now()->year)
-            ->count();
+            ->whereYear('deadline', Carbon::now()->year)->count();
 
-        // 4. Query utama data Team dengan pagination
+        // 4. Query utama data Team
+        // 4. Query utama data Team
         $daftarTeams = Team::with('creator')
-            ->withCount(['members as total_anggota' => function ($query) {
-                $query->wherePivot('join_status', 'accepted');
+            ->withCount(['members as total_anggota' => function($query) {
+                // FIXED: Menggunakan whereRaw agar string 'accepted' terbungkus petik secara aman di PostgreSQL
+                $query->whereRaw("team_members.join_status = 'accepted'"); 
             }])
             ->when($searchQuery, function ($query, $search) {
-                return $query->where('team_name', 'ILIKE', "%{$search}%")
-                             ->orWhere('category', 'ILIKE', "%{$search}%");
+                return $query->where('team_name', 'Ilike', "%{$search}%")
+                             ->orWhere('category', 'Ilike', "%{$search}%");
             })
             ->orderBy('id_team', 'desc')
             ->paginate(10);
 
         return view('daftarTeam', compact(
-            'daftarTeams',
-            'searchQuery',
-            'monthsTeams',
-            'countsTeams',
-            'monthsIntern',
+            'daftarTeams', 
+            'searchQuery', 
+            'monthsTeams', 
+            'countsTeams', 
+            'monthsIntern', 
             'countsIntern',
-            'teamsThisMonth',
+            'teamsThisMonth', 
             'internThisMonth'
         ));
     }
 
-    public function destroy($id)
+    public function getDetailTeam($id)
     {
-        $deleted = Team::where('id_team', $id)->delete();
+        // Cari team beserta relasi creator (student)
+        $team = Team::with('creator')->find($id);
 
-        if ($deleted) {
-            return redirect('/daftar-team')->with('success', 'Kelompok berhasil dihapus dari platform.');
+        if (!$team) {
+            return response()->json(['error' => 'Kelompok tidak ditemukan.'], 404);
         }
 
-        return redirect('/daftar-team')->with('error', 'Gagal menghapus data kelompok.');
+        // Hitung total anggota yang tergabung saat ini (sesuaikan dengan logika DB Anda)
+        // Misal jika ada tabel pivot atau kolom counter:
+        $totalAnggota = $team->members()->count(); // atau sesuai relasi kelompok Anda
+
+        return response()->json([
+            'team' => $team,
+            'total_anggota' => $totalAnggota
+        ]);
     }
 }

@@ -10,6 +10,36 @@
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
     background-color: #f8f9fa;
+    background-size: cover;
+    background-position: center;
+}
+
+/* ==========================================================================
+   LAYOUT & CONTAINERS
+   ========================================================================== */
+.container {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-content {
+    margin-left: 248px; /* Disinkronkan dengan ukuran width sidebar */
+    padding: 2rem;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* ==========================================================================
@@ -119,14 +149,6 @@ body {
 }
 
 /* ==========================================================================
-   LAYOUT & CONTAINER
-   ========================================================================== */
-.main-content {
-    margin-left: 248px; /* Disinkronkan dengan ukuran width sidebar Anda */
-    padding: 2rem;
-}
-
-/* ==========================================================================
    TOP HEADER STYLES
    ========================================================================== */
 .top-header {
@@ -148,8 +170,17 @@ body {
 }
 
 /* ==========================================================================
-   CARDS & UTILITIES (Rounded 10px)
+   CARDS & UTILITIES
    ========================================================================== */
+/* Glassmorphism Card */
+.card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* Custom Card Figma */
 .custom-card {
     border: none;
     border-radius: 10px; /* Presisi figma */
@@ -163,29 +194,88 @@ body {
 }
 
 /* ==========================================================================
-   BADGES & STATUS
+   FORMS & INPUT GROUPS
    ========================================================================== */
-.badge-pending {
-    background-color: #fff4e5;
-    color: #ff9800;
-    border-radius: 10px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
+.form-control {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    color: #333;
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: all 0.3s ease;
 }
 
-.badge-approved {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border-radius: 10px;
-    padding: 6px 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
+.form-control:focus {
+    background-color: white;
+    border-color: #0dcaf0;
+    color: #333;
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+}
+
+.form-control::placeholder {
+    color: #999;
+}
+
+/* Input group styling */
+.input-group {
+    position: relative;
+}
+
+.input-group .form-control {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    color: #333;
+    padding-right: 40px;
+}
+
+.input-group .form-control:focus {
+    background-color: white;
+    border-color: #0dcaf0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+}
+
+.input-group .btn-outline-secondary {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ddd;
+    border-left: none;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: white;
+    color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.input-group .btn-outline-secondary:focus {
+    box-shadow: none;
+    border-color: #0dcaf0;
 }
 
 /* ==========================================================================
-   BUTTONS & ACTIONS (Aksen Utama #1FABE1)
+   BUTTONS & ACTIONS
    ========================================================================== */
+.btn-info {
+    background-color: #0dcaf0;
+    border: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+    background-color: #0ba5d8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 202, 240, 0.3);
+}
+
+.btn-info:disabled {
+    background-color: #0dcaf0;
+    opacity: 0.7;
+}
+
 .btn-action {
     border-radius: 10px;
     font-weight: 600;
@@ -211,7 +301,7 @@ body {
     box-shadow: 0 5px 15px rgba(31, 171, 225, 0.3);
 }
 
-/* Skema warna dinamis pelengkap komponen database mitra */
+/* Skema warna dinamis utama #1FABE1 */
 .bg-custom-blue {
     background-color: #1FABE1 !important;
     color: #fff !important;
@@ -243,4 +333,112 @@ body {
     background-color: #1FABE1 !important;
     border-color: #1FABE1 !important;
     color: #fff !important;
+}
+
+/* ==========================================================================
+   ALERTS, BADGES & STATUS
+   ========================================================================== */
+#alertContainer {
+    margin-bottom: 20px;
+}
+
+.alert {
+    border-radius: 8px;
+    border: none;
+    font-size: 14px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-left: 4px solid #198754;
+    color: #0f5132;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    border-left: 4px solid #dc3545;
+    color: #842029;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left: 4px solid #ffc107;
+    color: #664d03;
+}
+
+.alert-info {
+    background-color: rgba(13, 202, 240, 0.1);
+    border-left: 4px solid #0dcaf0;
+    color: #055160;
+}
+
+.alert strong {
+    font-weight: 600;
+}
+
+.btn-close {
+    opacity: 0.7;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}
+
+.badge-pending {
+    background-color: #fff4e5;
+    color: #ff9800;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.badge-approved {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MEDIA QUERIES)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .card {
+        max-width: 100%;
+        margin: 20px;
+    }
+
+    .row {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .col {
+        width: 100%;
+    }
+
+    #imageSection {
+        display: none;
+    }
+    
+    /* Tambahan opsional: sesuaikan main-content saat layar kecil jika diperlukan */
+    .main-content {
+        margin-left: 0; 
+        padding: 1rem;
+    }
 }
